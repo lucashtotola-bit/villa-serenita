@@ -8,6 +8,7 @@ import {
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/periodo'
 import { ModalLancamento } from './ModalLancamento'
+import { PainelTransferencias } from './PainelTransferencias'
 
 /** Colunas do protótipo (linha 334), com as de texto em fração para não estourar. */
 const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px'
@@ -129,15 +130,7 @@ export function Lancamentos() {
           </p>
         </div>
       ) : aba.id === 'transf' ? (
-        <div className="rounded-card border border-borda bg-card p-6">
-          <span className="inline-block rounded-pill border border-borda-campo px-3 py-1 text-[12px] text-texto-3">
-            Em construção · Passo 3 desta etapa
-          </span>
-          <p className="mt-3 text-[13.5px] text-texto-2">
-            Transferência entre contas gera uma saída na origem e uma entrada no
-            destino, sem afetar receitas, despesas nem o rateio.
-          </p>
-        </div>
+        <PainelTransferencias competencia={competencia} contaId={contaId || undefined} />
       ) : (
         <Tabela consulta={lancamentos} total={total} receita={aba.tipo === 'Receita'} />
       )}
