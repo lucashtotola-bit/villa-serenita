@@ -5,7 +5,7 @@ import { Casca } from './layout/Casca'
 import { Login } from './telas/Login'
 import { AcessoNegado } from './telas/AcessoNegado'
 import { EmConstrucao } from './telas/EmConstrucao'
-import { Cadastros } from './telas/Cadastros'
+import { Cadastros } from './telas/cadastros/Cadastros'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
