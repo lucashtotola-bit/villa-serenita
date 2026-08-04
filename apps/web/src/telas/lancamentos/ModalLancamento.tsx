@@ -6,11 +6,23 @@ import {
   cliforDe,
   useOpcoes,
 } from '../../dados/opcoes'
-import { useCriarLancamento, type NovoLancamento } from '../../dados/lancamentos'
-import { centavosParaDecimal, mascaraDinheiro, paraCentavos } from '../../lib/formato'
+import {
+  useAtualizarLancamento,
+  useCriarLancamento,
+  type Lancamento,
+  type NovoLancamento,
+} from '../../dados/lancamentos'
+import {
+  centavosParaDecimal,
+  decimalParaCentavos,
+  mascaraDinheiro,
+  paraCentavos,
+} from '../../lib/formato'
 
 type Props = {
   tipo: 'Receita' | 'Despesa'
+  /** Presente = editando este lançamento avulso; ausente = criando um novo. */
+  editando?: Lancamento
   aoFechar: () => void
   aoSalvar: () => void
 }
@@ -18,26 +30,36 @@ type Props = {
 const hoje = () => new Date().toISOString().slice(0, 10)
 
 /**
- * Janela de nova receita ou despesa.
+ * Janela de receita ou despesa — cria ou edita, conforme `editando`.
+ *
+ * Só lançamentos de origem "Avulso" chegam aqui em modo de edição: os gerados
+ * automaticamente (parcela de NF, receita de reserva…) se editam pela tela de
+ * origem, para não dessincronizar do valor que os gerou.
  *
  * A situação usa linguagem comum ("Já recebi" / "Ainda vou receber") em vez de
  * Prevista/Realizada: quem usa o sistema não precisa aprender o vocabulário do
  * banco de dados.
  */
-export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
+export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
   const opcoes = useOpcoes()
   const criar = useCriarLancamento()
+  const atualizar = useAtualizarLancamento()
+  const salvando = editando ? atualizar : criar
   const receita = tipo === 'Receita'
 
-  const [descricao, setDescricao] = useState('')
-  const [valor, setValor] = useState('')
-  const [jaAconteceu, setJaAconteceu] = useState(true)
-  const [data, setData] = useState(hoje)
-  const [contaId, setContaId] = useState('')
-  const [categoriaId, setCategoriaId] = useState('')
-  const [centroId, setCentroId] = useState('')
-  const [cliforId, setCliforId] = useState('')
-  const [observacao, setObservacao] = useState('')
+  const [descricao, setDescricao] = useState(editando?.descricao ?? '')
+  const [valor, setValor] = useState(() =>
+    editando ? mascaraDinheiro(String(decimalParaCentavos(editando.valor))) : '',
+  )
+  const [jaAconteceu, setJaAconteceu] = useState(editando?.situacao !== 'Prevista')
+  const [data, setData] = useState(
+    editando ? (editando.data_pagamento ?? editando.data_vencimento) : hoje(),
+  )
+  const [contaId, setContaId] = useState(editando?.conta_id ?? '')
+  const [categoriaId, setCategoriaId] = useState(editando?.categoria_id ?? '')
+  const [centroId, setCentroId] = useState(editando?.centro_id ?? '')
+  const [cliforId, setCliforId] = useState(editando?.clifor_id ?? '')
+  const [observacao, setObservacao] = useState(editando?.observacao ?? '')
   const [erro, setErro] = useState<string | null>(null)
 
   const categorias = useMemo(() => categoriasDe(opcoes.data, tipo), [opcoes.data, tipo])
@@ -45,16 +67,17 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
   const pessoas = useMemo(() => cliforDe(opcoes.data, tipo), [opcoes.data, tipo])
   const contas = opcoes.data?.contas ?? []
 
-  // Pré-seleciona quando há uma opção só: menos um clique no caso comum.
+  // Pré-seleciona quando há uma opção só: menos um clique no caso comum. Só
+  // faz sentido ao criar — ao editar, os campos já vêm preenchidos.
   useEffect(() => {
-    if (contas.length === 1) setContaId(contas[0].id)
-  }, [contas])
+    if (!editando && contas.length === 1) setContaId(contas[0].id)
+  }, [editando, contas])
   useEffect(() => {
-    setCategoriaId(categorias.length === 1 ? categorias[0].id : '')
-  }, [categorias])
+    if (!editando) setCategoriaId(categorias.length === 1 ? categorias[0].id : '')
+  }, [editando, categorias])
   useEffect(() => {
-    setCentroId(centros.length === 1 ? centros[0].id : '')
-  }, [centros])
+    if (!editando) setCentroId(centros.length === 1 ? centros[0].id : '')
+  }, [editando, centros])
 
   useEffect(() => {
     const aoTeclar = (e: KeyboardEvent) => {
@@ -78,7 +101,7 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
     if (!categoriaId) return setErro('Escolha a categoria.')
     if (!centroId) return setErro('Escolha o centro de custo/receita.')
 
-    const novo: NovoLancamento = {
+    const campos: NovoLancamento = {
       tipo,
       situacao: jaAconteceu ? 'Realizada' : 'Prevista',
       descricao: descricao.trim(),
@@ -95,7 +118,11 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
       observacao: observacao.trim() || null,
     }
 
-    criar.mutate(novo, { onSuccess: aoSalvar })
+    if (editando) {
+      atualizar.mutate({ id: editando.id, ...campos }, { onSuccess: aoSalvar })
+    } else {
+      criar.mutate(campos, { onSuccess: aoSalvar })
+    }
   }
 
   return (
@@ -112,7 +139,7 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
         className="w-full max-w-[560px] rounded-card border border-borda bg-card p-6 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
       >
         <h2 className="font-serif text-[22px] text-texto">
-          {receita ? 'Nova receita' : 'Nova despesa'}
+          {editando ? (receita ? 'Editar receita' : 'Editar despesa') : receita ? 'Nova receita' : 'Nova despesa'}
         </h2>
         <p className="mt-1 text-[13px] leading-relaxed text-texto-3">
           {receita
@@ -228,9 +255,9 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
           </div>
         )}
 
-        {(erro || criar.isError) && (
+        {(erro || salvando.isError) && (
           <p className="mt-4 rounded-campo border border-terracota-escura bg-terracota-escura/15 px-3 py-2.5 text-[13px] text-terracota-clara">
-            {erro ?? (criar.error as Error).message}
+            {erro ?? (salvando.error as Error).message}
           </p>
         )}
 
@@ -244,14 +271,14 @@ export function ModalLancamento({ tipo, aoFechar, aoSalvar }: Props) {
           </button>
           <button
             type="submit"
-            disabled={criar.isPending || faltaCadastro}
+            disabled={salvando.isPending || faltaCadastro}
             className={`rounded-campo px-5 py-2.5 text-[13.5px] font-semibold text-fundo transition-colors ${
-              criar.isPending || faltaCadastro
+              salvando.isPending || faltaCadastro
                 ? 'bg-primaria/55'
                 : 'bg-primaria hover:bg-primaria-clara'
             }`}
           >
-            {criar.isPending ? 'Salvando…' : 'Salvar'}
+            {salvando.isPending ? 'Salvando…' : editando ? 'Salvar alterações' : 'Salvar'}
           </button>
         </div>
       </form>

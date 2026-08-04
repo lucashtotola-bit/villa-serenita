@@ -14,6 +14,8 @@ export type Transferencia = {
   conta_destino_id: string
   conta_origem: Conta | null
   conta_destino: Conta | null
+  /** Os dois lançamentos que esta transferência gerou. */
+  lancamentos: { conciliado: boolean }[]
 }
 
 // Duas chaves apontam para a mesma tabela, então cada uma precisa dizer por
@@ -21,7 +23,8 @@ export type Transferencia = {
 const CAMPOS = `
   id, data, valor, observacao, conta_origem_id, conta_destino_id,
   conta_origem:contas_bancarias!conta_origem_id ( banco, apelido ),
-  conta_destino:contas_bancarias!conta_destino_id ( banco, apelido )
+  conta_destino:contas_bancarias!conta_destino_id ( banco, apelido ),
+  lancamentos ( conciliado )
 `
 
 export function useTransferencias(competencia: string, contaId?: string) {
@@ -71,6 +74,28 @@ export function useCriarTransferencia() {
   return useMutation({
     mutationFn: async (nova: NovaTransferencia) => {
       const { error } = await supabase.from('transferencias').insert(nova)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['transferencias'] })
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}
+
+/**
+ * Arquiva a transferência. O banco propaga para os dois lançamentos gerados
+ * (migração 0011) e recusa se algum deles já estiver conciliado — mudar o
+ * valor de uma transferência não é permitido; arquivar e lançar de novo é
+ * o caminho, como um estorno em ERP de verdade.
+ */
+export function useArquivarTransferencia() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('transferencias').update({ ativo: false }).eq('id', id)
       if (error) throw new Error(traduzirErro(error))
     },
     onSuccess: () => {

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  useArquivarLancamento,
   useLancamentos,
   useSaldos,
   type Lancamento,
@@ -10,8 +11,8 @@ import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/peri
 import { ModalLancamento } from './ModalLancamento'
 import { PainelTransferencias } from './PainelTransferencias'
 
-/** Colunas do protótipo (linha 334), com as de texto em fração para não estourar. */
-const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px'
+/** Colunas do protótipo (linha 334) + Ações, para editar/arquivar avulsos. */
+const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px 86px'
 
 type Aba = {
   id: string
@@ -33,6 +34,7 @@ export function Lancamentos() {
   const [abaId, setAbaId] = useState('rec')
   const [contaId, setContaId] = useState('')
   const [modalAberto, setModalAberto] = useState(false)
+  const [editando, setEditando] = useState<Lancamento | null>(null)
 
   const aba = ABAS.find((a) => a.id === abaId) ?? ABAS[0]
   const saldos = useSaldos()
@@ -132,7 +134,12 @@ export function Lancamentos() {
       ) : aba.id === 'transf' ? (
         <PainelTransferencias competencia={competencia} contaId={contaId || undefined} />
       ) : (
-        <Tabela consulta={lancamentos} total={total} receita={aba.tipo === 'Receita'} />
+        <Tabela
+          consulta={lancamentos}
+          total={total}
+          receita={aba.tipo === 'Receita'}
+          aoEditar={setEditando}
+        />
       )}
 
       {modalAberto && (aba.id === 'rec' || aba.id === 'desp') && (
@@ -140,6 +147,15 @@ export function Lancamentos() {
           tipo={aba.id === 'rec' ? 'Receita' : 'Despesa'}
           aoFechar={() => setModalAberto(false)}
           aoSalvar={() => setModalAberto(false)}
+        />
+      )}
+
+      {editando && (
+        <ModalLancamento
+          tipo={editando.tipo as 'Receita' | 'Despesa'}
+          editando={editando}
+          aoFechar={() => setEditando(null)}
+          aoSalvar={() => setEditando(null)}
         />
       )}
     </div>
@@ -212,16 +228,18 @@ function Tabela({
   consulta,
   total,
   receita,
+  aoEditar,
 }: {
   consulta: ReturnType<typeof useLancamentos>
   total: number
   receita: boolean
+  aoEditar: (l: Lancamento) => void
 }) {
   const linhas = consulta.data ?? []
 
   return (
     <div className="overflow-x-auto rounded-card border border-borda bg-card">
-      <div className="min-w-[1040px] px-5 pb-4">
+      <div className="min-w-[1120px] px-5 pb-4">
         <div
           className="grid gap-3 border-b border-borda py-3 text-[11px] tracking-[0.06em] text-texto-3 uppercase"
           style={{ gridTemplateColumns: GRADE }}
@@ -233,6 +251,7 @@ function Tabela({
           <span>Conta bancária</span>
           <span className="text-right">Valor</span>
           <span className="text-right">Situação</span>
+          <span className="text-right">Ações</span>
         </div>
 
         {consulta.isPending && (
@@ -255,7 +274,7 @@ function Tabela({
         )}
 
         {linhas.map((l) => (
-          <Linha key={l.id} lancamento={l} receita={receita} />
+          <Linha key={l.id} lancamento={l} receita={receita} aoEditar={aoEditar} />
         ))}
 
         {!!linhas.length && (
@@ -279,9 +298,23 @@ function Tabela({
   )
 }
 
-function Linha({ lancamento: l, receita }: { lancamento: Lancamento; receita: boolean }) {
+function Linha({
+  lancamento: l,
+  receita,
+  aoEditar,
+}: {
+  lancamento: Lancamento
+  receita: boolean
+  aoEditar: (l: Lancamento) => void
+}) {
   const valor = decimalParaCentavos(l.valor)
   const prevista = l.situacao === 'Prevista'
+  const arquivar = useArquivarLancamento()
+  const [confirmando, setConfirmando] = useState(false)
+
+  // Só lançamentos avulsos e não conciliados são editáveis por aqui — os
+  // gerados (NF, reserva, café…) se editam pela tela de origem.
+  const editavel = l.origem === 'Avulso' && !l.conciliado
 
   return (
     <div
@@ -325,6 +358,61 @@ function Linha({ lancamento: l, receita }: { lancamento: Lancamento; receita: bo
 
       <span className="flex justify-end">
         <Situacao lancamento={l} receita={receita} />
+      </span>
+
+      <span className="flex flex-col items-end gap-1">
+        {!editavel ? (
+          <span
+            title={
+              l.conciliado
+                ? 'Conciliado — desfaça a conciliação para editar'
+                : 'Gerado automaticamente — edite pela tela de origem'
+            }
+            className="text-[11.5px] text-apagado"
+          >
+            —
+          </span>
+        ) : confirmando ? (
+          <span className="inline-flex items-center gap-2 text-[12px]">
+            <button
+              type="button"
+              onClick={() => arquivar.mutate(l.id, { onSuccess: () => setConfirmando(false) })}
+              disabled={arquivar.isPending}
+              className="text-terracota-clara hover:underline"
+            >
+              {arquivar.isPending ? 'Arquivando…' : 'Confirmar'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmando(false)}
+              className="text-texto-3 hover:text-texto-2"
+            >
+              Não
+            </button>
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-2.5 text-[12px]">
+            <button
+              type="button"
+              onClick={() => aoEditar(l)}
+              className="text-texto-3 transition-colors hover:text-primaria-clara"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmando(true)}
+              className="text-texto-3 transition-colors hover:text-terracota-clara"
+            >
+              Arquivar
+            </button>
+          </span>
+        )}
+        {arquivar.isError && (
+          <span className="max-w-[140px] text-right text-[11px] leading-snug text-terracota-clara">
+            {(arquivar.error as Error).message}
+          </span>
+        )}
       </span>
     </div>
   )

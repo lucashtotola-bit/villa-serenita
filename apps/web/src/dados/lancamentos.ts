@@ -10,6 +10,15 @@ export type TipoLancamento =
   | 'Aporte'
   | 'Devolução'
 
+export type OrigemLancamento =
+  | 'Avulso'
+  | 'Nota fiscal'
+  | 'Dívida'
+  | 'Reserva'
+  | 'Café'
+  | 'Transferência'
+  | 'Aporte'
+
 export type Lancamento = {
   id: string
   tipo: TipoLancamento
@@ -22,7 +31,12 @@ export type Lancamento = {
   data_referencia: string
   conciliado: boolean
   sentido: 'Entrada' | 'Saída' | null
+  origem: OrigemLancamento
   conta_id: string
+  categoria_id: string | null
+  centro_id: string | null
+  clifor_id: string | null
+  observacao: string | null
   categorias: { nome: string } | null
   centros_custo: { nome: string } | null
   contas_bancarias: { banco: string; apelido: string } | null
@@ -41,7 +55,7 @@ export type SaldoConta = {
 const CAMPOS = `
   id, tipo, situacao, descricao, valor,
   data_vencimento, data_pagamento, data_referencia,
-  conciliado, sentido, conta_id,
+  conciliado, sentido, origem, conta_id, categoria_id, centro_id, clifor_id, observacao,
   categorias ( nome ),
   centros_custo ( nome ),
   contas_bancarias ( banco, apelido )
@@ -101,6 +115,42 @@ export function useCriarLancamento() {
     },
     onSuccess: () => {
       // O saldo das contas deriva dos lançamentos, então acompanha a gravação.
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}
+
+/**
+ * Edita um lançamento avulso. O banco recusa se ele estiver conciliado
+ * (trigger da migração 0003) ou não for de origem "Avulso" (migração 0011) —
+ * a mensagem de erro do Postgres já chega traduzida.
+ */
+export function useAtualizarLancamento() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...campos }: NovoLancamento & { id: string }) => {
+      const { error } = await supabase.from('lancamentos').update(campos).eq('id', id)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}
+
+/** Arquiva um lançamento avulso — nunca apaga. Recusado se já conciliado. */
+export function useArquivarLancamento() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('lancamentos').update({ ativo: false }).eq('id', id)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['lancamentos'] })
       qc.invalidateQueries({ queryKey: ['saldos'] })
     },
