@@ -16,9 +16,13 @@ no build.**
   lucro. Devolução não pode exceder o aporte em aberto do sócio.
 - Hóspedes são usados EXCLUSIVAMENTE em reservas (seleção obrigatória para salvar). Clientes e
   fornecedores (tabela separada) são a fonte de compras, despesas e vendas de café.
-- Notas fiscais: destinatário apenas Lucas ou Michel (o sítio não tem CNPJ); anexo do arquivo é
-  OBRIGATÓRIO; pagamento à vista por padrão; "Inserir nova parcela" redivide o total igualmente com
-  vencimentos +30 dias; a soma das parcelas deve bater exatamente com o total.
+- Notas fiscais: destinatário apenas Lucas ou Michel (o sítio não tem CNPJ); pagamento à vista por
+  padrão; "Inserir nova parcela" redivide o total igualmente com vencimentos +30 dias; a soma das
+  parcelas deve bater exatamente com o total.
+- Anexo da nota fiscal **não** bloqueia o registro (revisto em 04/08/2026): a nota é salva com ou
+  sem arquivo, fica listada em `notas_fiscais_sem_anexo` e o **mês não fecha** enquanto houver nota
+  sem documento. Bloquear na hora de registrar produzia dado pior — quando o PDF ainda não chegou,
+  o usuário desistiria de registrar ou anexaria qualquer arquivo só para passar.
 - Transferência entre contas gera saída na origem + entrada no destino; nunca é receita nem despesa
   e não entra no rateio.
 - Conciliação: lançamento conciliado fica somente leitura; prestação de contas só pode ser gerada
@@ -33,8 +37,11 @@ no build.**
 - **Banco e nuvem:** Supabase (Postgres + Auth + Storage + RLS).
 - **Login:** Entrar com Google, restrito aos 4 e-mails cadastrados. Qualquer outro é recusado.
 - **Interface:** React + Vite + TypeScript. Reconstruída fielmente a partir do protótipo.
-- **Distribuição:** web hospedada; o `.exe` (Electron) carrega a versão da nuvem, para que ninguém
-  precise reinstalar a cada atualização. O instalador é a **última** etapa do projeto.
+- **Distribuição:** aplicativo web hospedado, instalável pelo próprio navegador (PWA) — ganha ícone
+  na área de trabalho e abre em janela própria, sem barra de endereço. Decidido em 04/08/2026, em
+  substituição ao instalador `.exe` (Electron): dispensa download, evita o aviso de segurança do
+  Windows, atualiza sozinho e funciona também no celular. O Electron foi descartado e vive apenas
+  em `spec/legado-electron/`.
 - **Anexos:** fonte da verdade no Supabase Storage, com cópia espelhada no Google Drive do Lucas.
   A autorização do Google vive **apenas no servidor** (Edge Function) — nunca no cliente.
 
@@ -56,9 +63,11 @@ Arquivo de NF: `NF-{numero}-{emitente}.pdf`.
 
 As invariantes contábeis ficam **no banco** (constraints/triggers/policies), não só na interface:
 soma das parcelas = total; devolução ≤ aporte em aberto; lançamento conciliado read-only;
-NF sem anexo rejeitada; destinatário de NF restrito; origem ≠ destino em transferência;
-parcelas de NF/dívida geram despesas previstas; saldos e prestação de contas calculados a partir
-dos lançamentos; `audit_log` alimentado por trigger.
+destinatário de NF restrito; origem ≠ destino em transferência; dupla reserva da mesma acomodação
+recusada por restrição de exclusão; estoque de café não fica negativo; parcelas de NF/dívida geram
+despesas previstas; saldos e prestação de contas calculados a partir dos lançamentos;
+`fechar_periodo()` recusa mês não conciliado **ou com nota fiscal sem documento**;
+`audit_log` alimentado por trigger.
 
 Ficam na aplicação: pré-preenchimentos, cálculo de +30 dias, redivisão de parcelas, UX de
 conciliação.

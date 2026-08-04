@@ -136,6 +136,30 @@ uma nota fiscal, que exige anexo.
 A versão anterior fica arquivada e recuperável. Foi justamente a falta de controle
 de notas fiscais que motivou este sistema; nenhum documento fiscal desaparece.
 
+**20. Anexo de nota fiscal cobra, não bloqueia.** *(revisão de 04/08/2026)*
+A nota é salva com ou sem arquivo. Sem o documento, ela fica listada em
+`notas_fiscais_sem_anexo`, aparece nos alertas e **impede o fechamento do mês**
+da emissão.
+
+O desenho anterior exigia o anexo para salvar. O raciocínio era "o problema é
+falta de controle das notas, logo o sistema não pode aceitar nota sem
+documento" — e ignorava que o bloqueio produz dado *pior* do que o que tenta
+evitar. Quando o PDF ainda não chegou, o usuário ou desiste de registrar (e a
+nota some, que é o problema original) ou anexa qualquer arquivo só para passar
+(e o anexo perde o sentido). Some-se a isso que "anexo" não é critério bem
+definido: foto do papel, XML e boleto passariam igualmente.
+
+O objetivo real nunca foi impedir nota sem anexo; era não deixar nenhuma ser
+esquecida. Visibilidade mais trava no fechamento atendem isso sem atrapalhar o
+registro do dia a dia.
+
+**21. Entrega como aplicativo web instalável (PWA).** *(revisão de 04/08/2026)*
+Substitui o instalador `.exe` em Electron. O navegador oferece "Instalar", o
+usuário ganha ícone na área de trabalho e uma janela sem barra de endereço.
+Dispensa download de 78 MB, evita o aviso "O Windows protegeu seu PC" (que só
+sumiria com certificado pago), atualiza sozinho para todos e funciona também no
+celular. Elimina a etapa de empacotamento do fim do projeto.
+
 ---
 
 ## Decisões herdadas da Etapa 1
