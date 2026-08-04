@@ -1,10 +1,16 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './auth/contexto'
 import { TelaCentral } from './componentes/TelaCentral'
+import { Casca } from './layout/Casca'
 import { Login } from './telas/Login'
 import { AcessoNegado } from './telas/AcessoNegado'
-import { Entrou } from './telas/Entrou'
+import { EmConstrucao } from './telas/EmConstrucao'
+import { Cadastros } from './telas/Cadastros'
 
-/** Decide qual tela mostrar conforme a situação do usuário. */
+/**
+ * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
+ * si só é montado quando a situação é `autorizado`.
+ */
 export default function App() {
   const { situacao } = useAuth()
 
@@ -18,8 +24,30 @@ export default function App() {
     case 'negado':
       return <AcessoNegado />
     case 'autorizado':
-      return <Entrou />
+      return <Aplicativo />
   }
+}
+
+function Aplicativo() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Casca />}>
+          <Route path="/" element={<EmConstrucao />} />
+          <Route path="/calendario" element={<EmConstrucao />} />
+          <Route path="/reservas" element={<EmConstrucao />} />
+          <Route path="/cafe" element={<EmConstrucao />} />
+          <Route path="/lancamentos" element={<EmConstrucao />} />
+          <Route path="/notas-fiscais" element={<EmConstrucao />} />
+          <Route path="/conciliacao" element={<EmConstrucao />} />
+          <Route path="/cadastros" element={<Cadastros />} />
+          <Route path="/safras" element={<EmConstrucao />} />
+          {/* Endereço desconhecido volta para a Visão geral. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 function Aguardando({ texto }: { texto: string }) {
