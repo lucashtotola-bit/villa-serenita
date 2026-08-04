@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Identidade visual da Villa Serenità.
+
+   Os valores vêm do protótipo (spec/prototipo) e estão fixados no CLAUDE.md.
+   Declarados aqui uma única vez, viram utilitários do Tailwind:
+     --color-primaria  ->  bg-primaria, text-primaria, border-primaria
+     --radius-card     ->  rounded-card
+   Assim nenhuma tela precisa repetir código de cor solto.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Superfícies */
+  --color-fundo: #161c0d;
+  --color-card: #212a14;
+
+  /* Texto, do mais forte ao mais apagado */
+  --color-texto: #edeade;
+  --color-texto-2: #c3c6ac;
+  --color-texto-3: #8b9174;
+  --color-apagado: #6f7658;
+
+  /* Verde — ação primária */
+  --color-primaria: #93a35f;
+  --color-primaria-clara: #a8b76e;
+  --color-verde-escuro: #7d9a4a;
+  --color-verde-claro: #a3c47d;
+  --color-verde-suave: #b7c880;
+
+  /* Terracota — despesa, erro e alerta */
+  --color-terracota: #c2705a;
+  --color-terracota-escura: #a9553f;
+  --color-terracota-clara: #d2917c;
+
+  /* Neutros claros */
+  --color-neutro: #cbd0b0;
+  --color-neutro-claro: #d8dcc4;
+
+  /* Bordas */
+  --color-borda: rgb(255 255 255 / 0.07);
+  --color-borda-campo: rgb(255 255 255 / 0.14);
+
+  /* Tipografia */
+  --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+
+  /* Raios — cards 12px, campos 9px, pills 99px */
+  --radius-card: 12px;
+  --radius-campo: 9px;
+  --radius-pill: 99px;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-fundo);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-fundo);
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Barra de rolagem no tom do app, como no protótipo. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #37421f;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
