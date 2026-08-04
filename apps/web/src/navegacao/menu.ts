@@ -63,15 +63,7 @@ export const MENU: GrupoMenu[] = [
   {
     titulo: 'Financeiro',
     itens: [
-      {
-        caminho: '/lancamentos',
-        icone: '◎',
-        rotulo: 'Lançamentos',
-        etapa: 2,
-        resumo:
-          'Receitas, despesas, transferências entre contas, dívidas e ' +
-          'prestação de contas.',
-      },
+      { caminho: '/lancamentos', icone: '◎', rotulo: 'Lançamentos' },
       {
         caminho: '/notas-fiscais',
         icone: '▣',
