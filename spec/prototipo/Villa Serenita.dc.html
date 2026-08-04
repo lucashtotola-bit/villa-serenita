@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Instrument+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#161c0d;font-family:'Instrument Sans',system-ui,sans-serif;color:#edeade}
+a{color:#93a35f;text-decoration:none}a:hover{color:#b7c880}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#37421f;border-radius:5px}::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#161c0d">
+  <aside style="width:224px;flex:none;border-right:1px solid rgba(255,255,255,.07);padding:28px 16px;display:flex;flex-direction:column;gap:28px;position:sticky;top:0;height:100vh;box-sizing:border-box">
+    <div style="padding:0 10px">
+      <div style="font-family:'Instrument Serif',serif;font-size:24px;letter-spacing:.2px;font-style:italic">Villa Serenità</div>
+      <div style="font-size:11px;color:#8b9174;margin-top:3px;letter-spacing:.08em;text-transform:uppercase">Santa Teresa · ES</div>
+    </div>
+    <div onClick="{{ abrirNova }}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13.5px;cursor:pointer" style-hover="background:#a8b76e">＋ Nova reserva</div>
+    <nav style="display:flex;flex-direction:column;gap:2px;margin-top:-14px">
+      <sc-for list="{{ navGrupos }}" as="g" hint-placeholder-count="3">
+        <div style="margin-top:{{ g.espaco }}">
+          <div style="font-size:10.5px;color:#6f7658;letter-spacing:.12em;text-transform:uppercase;padding:0 12px 7px">{{ g.titulo }}</div>
+          <sc-for list="{{ g.itens }}" as="it" hint-placeholder-count="4">
+            <div onClick="{{ it.onClick }}" style="{{ it.style }}" style-hover="background:rgba(255,255,255,.05)">
+              <span style="width:20px;text-align:center;opacity:.8">{{ it.icon }}</span>{{ it.label }}
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </nav>
+    <div style="margin-top:auto;padding:14px 12px;border:1px solid rgba(255,255,255,.07);border-radius:10px;background:#212a14">
+      <div style="font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Julho 2026</div>
+      <div style="font-size:13px;margin-top:6px;line-height:1.5;color:#c3c6ac">Fins de semana ocupados <strong style="color:#93a35f">{{ ocupResumo }}</strong><br>Safra 26/27 em <strong style="color:#7d9a4a">colheita</strong></div>
+    </div>
+  </aside>
+  <main style="flex:1;min-width:0;padding:32px 40px 48px;box-sizing:border-box">
+
+    <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Dashboard">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Visão geral</h1>
+          <span style="font-size:13px;color:#8b9174">quarta, 30 de julho de 2026</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:24px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:18px 20px">
+              <div style="font-size:11.5px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ k.label }}</div>
+              <div style="font-family:'Instrument Serif',serif;font-size:28px;margin-top:8px">{{ k.value }}</div>
+              <div style="font-size:12px;margin-top:6px;color:{{ k.deltaColor }}">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px">
+          <sc-for list="{{ acoesRapidas }}" as="a" hint-placeholder-count="4">
+            <div onClick="{{ a.onClick }}" style="display:flex;align-items:center;gap:13px;background:#212a14;border:1px solid rgba(147,163,95,.22);border-radius:12px;padding:15px 18px;cursor:pointer" style-hover="border-color:#93a35f;background:#26301a">
+              <span style="width:34px;height:34px;flex:none;border-radius:9px;background:rgba(147,163,95,.16);color:#b7c880;display:grid;place-items:center;font-size:15px">{{ a.icone }}</span>
+              <div style="min-width:0">
+                <div style="font-size:13.5px;font-weight:500">{{ a.titulo }}</div>
+                <div style="font-size:11.5px;color:#8b9174;margin-top:2px">{{ a.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Próximas chegadas</h2>
+              <span onClick="{{ navCal }}" style="font-size:12.5px;color:#93a35f;cursor:pointer">ver calendário →</span>
+            </div>
+            <div style="display:flex;flex-direction:column;margin-top:12px">
+              <sc-for list="{{ proximas }}" as="r" hint-placeholder-count="4">
+                <div onClick="{{ r.onClick }}" style="display:flex;align-items:center;gap:14px;padding:12px 8px;border-top:1px solid rgba(255,255,255,.06);cursor:pointer;border-radius:6px" style-hover="background:rgba(255,255,255,.04)">
+                  <span style="width:8px;height:8px;border-radius:50%;background:{{ r.color }};flex:none"></span>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:14px;font-weight:500">{{ r.hospede }}</div>
+                    <div style="font-size:12px;color:#8b9174;margin-top:2px">{{ r.acomodacao }} · {{ r.periodo }}</div>
+                  </div>
+                  <span style="font-size:11px;padding:3px 9px;border-radius:99px;background:{{ r.canalBg }};color:{{ r.canalFg }}">{{ r.canal }}</span>
+                  <span style="font-size:13.5px;color:#c3c6ac;width:84px;text-align:right">{{ r.valor }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Resultado do mês</h2>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                <sc-for list="{{ resultadoMes }}" as="b" hint-placeholder-count="3">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#c3c6ac">{{ b.label }}</span><span>{{ b.valor }}</span></div>
+                    <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.06);margin-top:5px"><div style="height:6px;border-radius:3px;background:{{ b.color }};width:{{ b.pct }}"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Alertas</h2>
+                <span onClick="{{ navFin }}" style="font-size:12.5px;color:#93a35f;cursor:pointer">financeiro →</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+                <sc-for list="{{ alertas }}" as="a" hint-placeholder-count="3">
+                  <div style="display:flex;gap:10px;font-size:13px;line-height:1.45;color:#c3c6ac"><span style="color:{{ a.color }}">●</span><span><strong style="color:#edeade">{{ a.titulo }}</strong> — {{ a.desc }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Notas fiscais acumuladas</h2>
+                <span onClick="{{ navNf }}" style="font-size:12.5px;color:#93a35f;cursor:pointer">notas fiscais →</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+                <sc-for list="{{ nfPorDestino }}" as="d" hint-placeholder-count="2">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 14px;border-radius:9px;background:rgba(255,255,255,.04)">
+                    <div style="min-width:0">
+                      <div style="font-size:13.5px;font-weight:500">{{ d.nome }}</div>
+                      <div style="font-size:11.5px;color:#8b9174;margin-top:3px">{{ d.detalhe }}</div>
+                    </div>
+                    <div style="text-align:right;white-space:nowrap">
+                      <div style="font-family:'Instrument Serif',serif;font-size:20px">{{ d.total }}</div>
+                      <div style="font-size:11.5px;color:{{ d.abertoCor }};margin-top:2px">{{ d.aberto }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCal }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Calendário">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Calendário de reservas</h1>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span onClick="{{ abrirNova }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;margin-right:6px" style-hover="background:#a8b76e">＋ Nova reserva</span>
+            <span onClick="{{ abrirAnexo }}" style="padding:8px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer;margin-right:6px" style-hover="border-color:#93a35f;color:#b7c880">📎 Anexar comprovante</span>
+            <span onClick="{{ mesAnterior }}" style="width:30px;height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#c3c6ac" style-hover="background:rgba(255,255,255,.06)">‹</span>
+            <span style="font-family:'Instrument Serif',serif;font-size:19px;min-width:150px;text-align:center">{{ mesLabel }}</span>
+            <span onClick="{{ mesProximo }}" style="width:30px;height:30px;border:1px solid rgba(255,255,255,.12);border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#c3c6ac" style-hover="background:rgba(255,255,255,.06)">›</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+          <sc-for list="{{ filtrosCanal }}" as="f" hint-placeholder-count="4">
+            <span onClick="{{ f.onClick }}" style="{{ f.style }}" style-hover="border-color:rgba(255,255,255,.3)">{{ f.label }}</span>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;margin-top:18px">
+          <sc-for list="{{ calendarios }}" as="c" hint-placeholder-count="3">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px 22px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                <span style="font-family:'Instrument Serif',serif;font-size:19px;display:flex;align-items:center;gap:9px"><span style="width:9px;height:9px;border-radius:50%;background:{{ c.color }}"></span>{{ c.nome }}</span>
+                <span style="font-size:12px;color:#8b9174">{{ c.ocup }} dos fds</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:16px">
+                <sc-for list="{{ diasSemana }}" as="w" hint-placeholder-count="7">
+                  <div style="text-align:center;font-size:10.5px;letter-spacing:.06em;color:{{ w.color }};padding-bottom:4px">{{ w.letra }}</div>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:2px">
+                <sc-for list="{{ c.celulas }}" as="d" hint-placeholder-count="35">
+                  <div onClick="{{ d.onClick }}" title="{{ d.titulo }}" style="{{ d.style }}" style-hover="{{ d.hover }}">{{ d.num }}</div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);font-size:12px;color:#8b9174">
+                <span>{{ c.qtdReservas }} reservas</span>
+                <span style="color:#c3c6ac">{{ c.receita }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:14px;font-size:12px;color:#8b9174;align-items:center;flex-wrap:wrap">
+          <span style="letter-spacing:.06em;text-transform:uppercase;font-size:11px">Canais:</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#c2705a"></span>Airbnb</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#8aab55"></span>WhatsApp</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#cbd0b0"></span>Instagram (@villaserenita)</span>
+          <span style="display:flex;align-items:center;gap:6px;margin-left:8px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(147,163,95,.09);border:1px solid rgba(147,163,95,.22)"></span>noite vendável livre (sex/sáb + feriados) — base do cálculo de ocupação</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isLista }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Reservas">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Reservas</h1>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;color:#8b9174">{{ totalReservas }} reservas · {{ mesLabelLongo }}</span>
+            <span onClick="{{ abrirNova }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">＋ Nova reserva</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+          <sc-for list="{{ filtrosAcc }}" as="f" hint-placeholder-count="4">
+            <span onClick="{{ f.onClick }}" style="{{ f.style }}" style-hover="border-color:rgba(255,255,255,.3)">{{ f.label }}</span>
+          </sc-for>
+        </div>
+        <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:16px;padding:8px 22px 14px;overflow-x:auto">
+          <div style="display:grid;grid-template-columns:1.2fr 1fr 130px 110px 110px 110px;gap:12px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08);min-width:860px">
+            <span>Hóspede</span><span>Acomodação</span><span>Período</span><span>Canal</span><span>Status</span><span style="text-align:right">Valor</span>
+          </div>
+          <sc-for list="{{ listaReservas }}" as="r" hint-placeholder-count="8">
+            <div onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:1.2fr 1fr 130px 110px 110px 110px;gap:12px;padding:13px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;cursor:pointer;min-width:860px" style-hover="background:rgba(255,255,255,.03)">
+              <span style="font-weight:500;display:flex;align-items:center;gap:9px"><span style="width:7px;height:7px;border-radius:50%;background:{{ r.color }};flex:none"></span>{{ r.hospede }}</span>
+              <span style="color:#c3c6ac">{{ r.acomodacao }}</span>
+              <span style="color:#c3c6ac;font-size:12.5px">{{ r.periodo }}</span>
+              <span style="font-size:11.5px;padding:3px 9px;border-radius:99px;width:fit-content;background:{{ r.canalBg }};color:{{ r.canalFg }}">{{ r.canal }}</span>
+              <span style="font-size:12.5px;color:{{ r.statusColor }}">{{ r.status }}</span>
+              <span style="text-align:right;font-weight:500">{{ r.valor }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isRes }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Reserva">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span onClick="{{ navLista }}" style="width:32px;height:32px;border:1px solid rgba(255,255,255,.12);border-radius:8px;display:grid;place-items:center;cursor:pointer;color:#c3c6ac" style-hover="background:rgba(255,255,255,.06)">←</span>
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">{{ res.hospede }}</h1>
+          <span style="font-size:11.5px;padding:4px 11px;border-radius:99px;background:rgba(125,154,74,.16);color:#a3c47d;border:1px solid rgba(125,154,74,.3)">{{ res.status }}</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <span onClick="{{ abrirAnexo }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">📎 Anexar comprovante</span>
+            <span style="padding:8px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f;color:#b7c880">Enviar instruções</span>
+            <span style="padding:8px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f;color:#b7c880">Editar</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:24px">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 14px">Estadia</h2>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+                <sc-for list="{{ res.estadia }}" as="c" hint-placeholder-count="4">
+                  <div><div style="font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ c.label }}</div><div style="font-size:15px;margin-top:6px;font-weight:500">{{ c.valor }}</div></div>
+                </sc-for>
+              </div>
+              <div style="margin-top:18px;padding:14px 16px;border-radius:10px;background:rgba(147,163,95,.08);border:1px solid rgba(147,163,95,.2);display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px;color:#c3c6ac">Acomodação</span>
+                <span style="font-family:'Instrument Serif',serif;font-size:18px;color:#b7c880">{{ res.acomodacao }}</span>
+              </div>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 8px">Linha do tempo</h2>
+              <sc-for list="{{ res.timeline }}" as="t" hint-placeholder-count="4">
+                <div style="display:flex;gap:14px;padding:10px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13px">
+                  <span style="color:#8b9174;width:64px;flex:none">{{ t.data }}</span>
+                  <span style="color:{{ t.color }}">●</span>
+                  <span style="color:#c3c6ac">{{ t.texto }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 14px">Financeiro</h2>
+              <sc-for list="{{ res.fin }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;justify-content:space-between;font-size:13.5px;padding:7px 0;color:#c3c6ac"><span>{{ f.label }}</span><span style="color:{{ f.color }};font-weight:{{ f.peso }}">{{ f.valor }}</span></div>
+              </sc-for>
+              <div style="border-top:1px solid rgba(255,255,255,.1);margin-top:8px;padding-top:12px;display:flex;justify-content:space-between;align-items:baseline">
+                <span style="font-size:13px;color:#8b9174">Líquido estimado</span>
+                <span style="font-family:'Instrument Serif',serif;font-size:22px;color:#a3c47d">{{ res.liquido }}</span>
+              </div>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 12px">Contato &amp; notas</h2>
+              <div style="font-size:13.5px;line-height:1.7;color:#c3c6ac">{{ res.contato }}</div>
+              <div style="margin-top:12px;padding:12px 14px;border-radius:8px;background:rgba(255,255,255,.04);font-size:13px;line-height:1.6;color:#c3c6ac;font-style:italic">“{{ res.nota }}”</div>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Comprovantes</h2>
+                <span style="font-size:11.5px;color:#8b9174">Drive compartilhado · /reservas/2026</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+                <sc-for list="{{ anexos }}" as="a" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;background:rgba(255,255,255,.04);cursor:pointer" style-hover="background:rgba(255,255,255,.08)">
+                    <span style="width:26px;height:26px;flex:none;border-radius:6px;background:rgba(147,163,95,.16);color:{{ a.cor }};display:grid;place-items:center;font-size:12px">▢</span>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nome }}</div>
+                      <div style="font-size:11px;color:#8b9174;margin-top:2px">{{ a.meta }}</div>
+                    </div>
+                    <span style="font-size:10.5px;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.06);color:#c3c6ac;flex:none">{{ a.tag }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div onClick="{{ abrirAnexo }}" style="margin-top:12px;padding:16px;border-radius:10px;border:1px dashed rgba(147,163,95,.4);text-align:center;font-size:12.5px;color:#8b9174;cursor:pointer;line-height:1.6" style-hover="border-color:#93a35f;color:#b7c880">Arraste um arquivo ou <strong style="color:#b7c880">clique para anexar</strong><br><span style="font-size:11px">salvo automaticamente no Drive compartilhado</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isFin }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Financeiro">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Financeiro</h1>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;color:#8b9174">consolidado · julho 2026</span>
+            <sc-if value="{{ finNaoDiv }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span onClick="{{ abrirReceita }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">＋ Nova receita</span>
+                <span onClick="{{ abrirDespesa }}" style="padding:8px 14px;border-radius:9px;border:1px solid rgba(169,85,63,.5);background:rgba(169,85,63,.12);color:#d69077;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:rgba(169,85,63,.22)">＋ Nova despesa</span>
+                <span onClick="{{ abrirTransf }}" style="padding:8px 14px;border-radius:9px;border:1px solid rgba(147,163,95,.45);color:#b7c880;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:rgba(147,163,95,.16)">⇄ Transferência entre contas</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ finIsDiv }}" hint-placeholder-val="{{ false }}">
+              <span onClick="{{ abrirDivida }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">＋ Novo contrato de dívida</span>
+            </sc-if>
+            <span onClick="{{ abrirAnexo }}" style="padding:8px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f;color:#b7c880">📎 Anexar comprovante</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:20px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;gap:6px;background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:5px;width:fit-content">
+            <sc-for list="{{ finTabs }}" as="t" hint-placeholder-count="3">
+              <span onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</span>
+            </sc-for>
+          </div>
+          <sc-if value="{{ finTemFiltroConta }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;align-items:center;gap:9px;font-size:12px;color:#8b9174">Conta
+              <select value="{{ contaFiltro }}" onChange="{{ contaFiltroOnChange }}" style="background:#212a14;border:1px solid rgba(255,255,255,.12);border-radius:9px;padding:8px 11px;color:#edeade;font-family:inherit;font-size:13px">
+                <sc-for list="{{ opcoesContaFiltro }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+              </select>
+            </label>
+          </sc-if>
+        </div>
+        <sc-if value="{{ finIsMov }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:16px;padding:8px 22px 16px;overflow-x:auto">
+            <div style="display:grid;grid-template-columns:76px 1fr 148px 124px 142px 108px 104px;gap:12px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08);min-width:1040px">
+              <span>Data</span><span>Descrição</span><span>Centro de custo/receita</span><span>Categoria</span><span>Conta bancária</span><span style="text-align:right">Valor</span><span style="text-align:right">Situação</span>
+            </div>
+            <sc-for list="{{ movimentos }}" as="m" hint-placeholder-count="6">
+              <div style="display:grid;grid-template-columns:76px 1fr 148px 124px 142px 108px 104px;gap:12px;padding:11px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;min-width:1040px">
+                <span style="color:#8b9174;font-size:12.5px">{{ m.data }}</span>
+                <span>{{ m.desc }}</span>
+                <span style="font-size:11.5px;padding:3px 9px;border-radius:99px;width:fit-content;background:{{ m.frenteBg }};color:{{ m.frenteFg }}">{{ m.frente }}</span>
+                <span style="color:#8b9174;font-size:12.5px">{{ m.cat }}</span>
+                <span style="color:#8b9174;font-size:12.5px">{{ m.conta }}</span>
+                <span style="text-align:right;color:{{ m.color }};font-weight:500">{{ m.valor }}</span>
+                <span style="display:flex;justify-content:flex-end"><span title="{{ m.travaTitulo }}" style="{{ m.travaStyle }}">{{ m.trava }}</span></span>
+              </div>
+            </sc-for>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 2px;min-width:940px">
+              <span style="font-size:12.5px;color:#8b9174">{{ movResumo }}</span>
+              <span style="font-family:'Instrument Serif',serif;font-size:22px;color:{{ movTotalColor }}">{{ movTotal }}</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ finIsTransf }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding:12px 18px;border-radius:10px;background:rgba(147,163,95,.07);border:1px solid rgba(147,163,95,.18);font-size:12.5px;color:#c3c6ac;flex-wrap:wrap">
+              <span style="color:#b7c880">⇄</span><span>Movimentação apenas de caixa — cada transferência gera uma saída na conta de origem e uma entrada na conta de destino, sem afetar receitas, despesas nem o rateio de lucro.</span>
+              <span onClick="{{ abrirTransf }}" style="margin-left:auto;font-size:12.5px;padding:6px 13px;border-radius:8px;border:1px solid rgba(147,163,95,.4);color:#b7c880;cursor:pointer;white-space:nowrap" style-hover="background:rgba(147,163,95,.16)">＋ Nova transferência</span>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:8px 22px 16px">
+              <div style="display:grid;grid-template-columns:70px minmax(0,1fr) 30px minmax(0,1fr) 118px;gap:10px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)">
+                <span>Data</span><span>Conta de origem (saída)</span><span></span><span>Conta de destino (entrada)</span><span style="text-align:right">Valor</span>
+              </div>
+              <sc-for list="{{ transferencias }}" as="t" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:70px minmax(0,1fr) 30px minmax(0,1fr) 118px;gap:10px;padding:13px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center">
+                  <span style="color:#8b9174;font-size:12.5px">{{ t.data }}</span>
+                  <div style="min-width:0">
+                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.origem }}</div>
+                    <div style="font-size:11.5px;color:#a9553f;margin-top:3px">{{ t.saida }}</div>
+                  </div>
+                  <span style="text-align:center;color:#6f7658">→</span>
+                  <div style="min-width:0">
+                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.destino }}</div>
+                    <div style="font-size:11.5px;color:#a3c47d;margin-top:3px">{{ t.entrada }}</div>
+                  </div>
+                  <span style="text-align:right;font-weight:500">{{ t.valor }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;font-size:12.5px;color:#8b9174"><span>{{ transfResumo }}</span><span style="font-family:'Instrument Serif',serif;font-size:21px;color:#edeade">{{ transfTotal }}</span></div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ finIsDiv }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px">
+            <sc-for list="{{ dividas }}" as="d" hint-placeholder-count="4">
+              <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+                  <div style="font-size:15px;font-weight:500">{{ d.nome }}</div>
+                  <span style="font-size:11.5px;padding:3px 9px;border-radius:99px;background:{{ d.tagBg }};color:{{ d.tagFg }}">{{ d.tag }}</span>
+                </div>
+                <div style="font-size:12.5px;color:#8b9174;margin-top:4px">{{ d.detalhe }}</div>
+                <div style="height:7px;border-radius:4px;background:rgba(255,255,255,.06);margin-top:16px"><div style="height:7px;border-radius:4px;background:{{ d.color }};width:{{ d.pct }}"></div></div>
+                <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-top:8px;color:#c3c6ac"><span>{{ d.pago }} pago</span><span>restam <strong style="color:#edeade">{{ d.resta }}</strong></span></div>
+                <div style="font-size:12px;color:#8b9174;margin-top:10px">Próxima parcela: <strong style="color:#b7c880">{{ d.proxima }}</strong></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ finIsSoc }}" hint-placeholder-val="{{ false }}">
+          <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px 20px;border-radius:12px;background:{{ prestBg }};border:1px solid {{ prestBorda }};flex-wrap:wrap">
+            <span style="font-size:16px;color:{{ prestCor }}">{{ prestIcone }}</span>
+            <div style="min-width:0;flex:1">
+              <div style="font-size:13.5px;font-weight:500;color:{{ prestCor }}">{{ prestTitulo }}</div>
+              <div style="font-size:12.5px;color:#8b9174;margin-top:3px;line-height:1.5">{{ prestDesc }}</div>
+            </div>
+            <span onClick="{{ prestAcao }}" style="{{ prestBtnStyle }}">{{ prestBtn }}</span>
+          </div>
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:20px 22px;opacity:{{ prestOpacidade }}">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Prestação de contas · 2º trimestre 2026</h2>
+              <span style="font-size:12.5px;padding:7px 14px;border-radius:8px;background:{{ pdfBg }};color:{{ pdfFg }};font-weight:600;cursor:{{ pdfCursor }}">Gerar relatório PDF</span>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px 92px 100px;gap:8px;padding:14px 0 10px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08);margin-top:8px">
+              <span>Sócio · cota 25%</span><span style="text-align:right">Lucro 25%</span><span style="text-align:right">Aportes</span><span style="text-align:right">Devoluções</span><span style="text-align:right">Em aberto</span>
+            </div>
+            <sc-for list="{{ socios }}" as="s" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 92px 92px 92px 100px;gap:8px;padding:13px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05)">
+                <span style="font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ s.nome }}</span>
+                <span style="text-align:right;color:#a3c47d;font-weight:500">{{ s.lucro }}</span>
+                <span style="text-align:right;color:#c3c6ac">{{ s.aportes }}</span>
+                <span style="text-align:right;color:#c3c6ac">{{ s.devolucoes }}</span>
+                <span style="text-align:right;color:{{ s.saldoColor }};font-weight:500">{{ s.saldo }}</span>
+              </div>
+            </sc-for>
+            <div style="margin-top:14px;font-size:12.5px;color:#8b9174;line-height:1.6">Resultado do trimestre: <strong style="color:#a3c47d">{{ resultadoTri }}</strong> — dividido igualmente (25% por sócio). Aportes e devoluções não entram no rateio: são créditos individuais, quitados antes da distribuição de lucro.</div>
+          </div>
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:20px 22px">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Aportes de capital</h2>
+              <div style="display:flex;gap:9px;flex-wrap:wrap">
+                <span onClick="{{ abrirAporte }}" style="font-size:12.5px;padding:8px 15px;border-radius:8px;background:#93a35f;color:#161c0d;font-weight:600;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">＋ Informar aporte</span>
+                <span onClick="{{ abrirDevolucao }}" style="font-size:12.5px;padding:8px 15px;border-radius:8px;border:1px solid rgba(147,163,95,.45);color:#b7c880;cursor:pointer;white-space:nowrap" style-hover="background:rgba(147,163,95,.16)">− Informar devolução</span>
+              </div>
+            </div>
+            <sc-for list="{{ extratoAportes }}" as="a" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:74px 1fr 130px;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;font-size:13px">
+                <span style="color:#8b9174;font-size:12.5px">{{ a.data }}</span>
+                <div style="min-width:0">
+                  <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="color:{{ a.cor }};font-weight:500">{{ a.tipo }}</span> · {{ a.socio }}</div>
+                  <div style="font-size:11.5px;color:#8b9174;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.obs }}</div>
+                </div>
+                <span style="text-align:right;font-weight:500;color:{{ a.cor }}">{{ a.valorFmt }}</span>
+              </div>
+            </sc-for>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;font-size:12.5px;color:#8b9174"><span>{{ aporteResumo }}</span><span style="font-family:'Instrument Serif',serif;font-size:21px;color:#b7c880">{{ aporteSaldoTotal }}</span></div>
+          </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCafe }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Café">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Produção de café</h1>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;color:#8b9174">Safra {{ safraAno }} · Villa Serenità</span>
+            <span onClick="{{ abrirLanc }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">＋ Apontamento da safra</span>
+            <span onClick="{{ abrirVendaCafe }}" style="padding:8px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f;color:#b7c880">Registrar venda</span>
+          </div>
+        </div>
+        <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:24px;padding:22px">
+          <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 18px">Etapas da safra</h2>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+            <sc-for list="{{ etapas }}" as="e" hint-placeholder-count="6">
+              <div style="text-align:center">
+                <div style="height:4px;border-radius:2px;background:{{ e.barra }}"></div>
+                <div style="font-size:12.5px;margin-top:10px;font-weight:{{ e.peso }};color:{{ e.color }}">{{ e.nome }}</div>
+                <div style="font-size:11px;color:#8b9174;margin-top:3px">{{ e.periodo }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:18px;padding:13px 16px;border-radius:10px;background:rgba(125,154,74,.08);border:1px solid rgba(125,154,74,.2);font-size:13px;color:#c3c6ac">● Colheita em andamento — <strong style="color:#a3c47d">64% dos talhões</strong> concluídos · previsão de término em 22/08</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 14px">Custos da safra</h2>
+            <sc-for list="{{ custosCafe }}" as="c" hint-placeholder-count="5">
+              <div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#c3c6ac">{{ c.label }}</span><span>{{ c.valor }}</span></div>
+                <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.06);margin-top:5px"><div style="height:5px;border-radius:3px;background:#93a35f;width:{{ c.pct }}"></div></div>
+              </div>
+            </sc-for>
+            <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:10px;display:flex;justify-content:space-between;font-size:13.5px"><span style="color:#8b9174">Total investido</span><strong>{{ totalCustoCafe }}</strong></div>
+          </div>
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 14px">Estoque</h2>
+            <div style="text-align:center;padding:10px 0 16px">
+              <div style="font-family:'Instrument Serif',serif;font-size:44px">148</div>
+              <div style="font-size:12px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;margin-top:2px">sacas beneficiadas (60kg)</div>
+            </div>
+            <sc-for list="{{ estoque }}" as="e" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06);color:#c3c6ac"><span>{{ e.label }}</span><span style="font-weight:500;color:#edeade">{{ e.valor }}</span></div>
+            </sc-for>
+          </div>
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 14px">Vendas</h2>
+            <sc-for list="{{ vendas }}" as="v" hint-placeholder-count="3">
+              <div style="padding:10px 0;border-top:1px solid rgba(255,255,255,.06)">
+                <div style="display:flex;justify-content:space-between;font-size:13.5px"><span style="font-weight:500">{{ v.comprador }}</span><span style="color:#a3c47d;font-weight:500">{{ v.valor }}</span></div>
+                <div style="font-size:12px;color:#8b9174;margin-top:3px">{{ v.detalhe }}</div>
+              </div>
+            </sc-for>
+            <div style="margin-top:12px;padding:11px 14px;border-radius:8px;background:rgba(147,163,95,.08);border:1px solid rgba(147,163,95,.2);font-size:12.5px;color:#c3c6ac">Preço médio realizado: <strong style="color:#b7c880">R$ 1.420/saca</strong> · cotação atual: R$ 1.385</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCad }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Cadastros">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Cadastros</h1>
+            <div style="font-size:13px;color:#8b9174;margin-top:4px">tabelas base — alimentam os lançamentos, reservas e a conciliação</div>
+          </div>
+          <span onClick="{{ abrirCad }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">＋ {{ cadBotao }}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:20px;background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:5px;width:fit-content;flex-wrap:wrap">
+          <sc-for list="{{ cadTabs }}" as="t" hint-placeholder-count="4">
+            <span onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</span>
+          </sc-for>
+        </div>
+        <div style="margin-top:16px">
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:8px 22px 16px">
+            <div style="display:flex;gap:14px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)">
+              <sc-for list="{{ cadCols }}" as="c" hint-placeholder-count="3">
+                <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c }}</span>
+              </sc-for>
+              <span style="width:26px;flex:none"></span>
+            </div>
+            <sc-for list="{{ cadLista }}" as="r" hint-placeholder-count="6">
+              <div style="display:flex;gap:14px;padding:12px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center" style-hover="background:rgba(255,255,255,.03)">
+                <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3">
+                  <span title="{{ c.texto }}" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:{{ c.color }};font-weight:{{ c.peso }}">{{ c.texto }}</span>
+                </sc-for>
+                <span onClick="{{ r.remover }}" title="Excluir" style="width:26px;flex:none;text-align:center;color:#6f7658;cursor:pointer;font-size:13px" style-hover="color:#c2705a">✕</span>
+              </div>
+            </sc-for>
+            <div style="font-size:12px;color:#8b9174;padding-top:14px">{{ cadRodape }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isNf }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Notas fiscais">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Notas fiscais</h1>
+            <div style="font-size:13px;color:#8b9174;margin-top:4px">despesas e compras emitidas contra Lucas e Michel · arquivo obrigatório no Drive</div>
+          </div>
+          <span onClick="{{ abrirNf }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">＋ Lançar nota fiscal</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px">
+          <sc-for list="{{ nfKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 20px">
+              <div style="font-size:11.5px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ k.label }}</div>
+              <div style="font-family:'Instrument Serif',serif;font-size:25px;margin-top:6px;color:{{ k.color }}">{{ k.value }}</div>
+              <div style="font-size:11.5px;color:#8b9174;margin-top:4px">{{ k.detalhe }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;align-items:center">
+          <div style="display:flex;gap:6px;background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:5px;width:fit-content">
+            <sc-for list="{{ nfTabs }}" as="t" hint-placeholder-count="4">
+              <span onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</span>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ nfFiltrosDest }}" as="f" hint-placeholder-count="3">
+              <span onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:8px 22px 16px">
+          <div style="display:grid;grid-template-columns:minmax(0,1.6fr) 78px 92px minmax(0,1.2fr) 88px 48px;gap:8px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)">
+            <span>Nota · emitente</span><span>Destino</span><span style="text-align:right">Valor</span><span>Parcelas</span><span style="text-align:right">Situação</span><span style="text-align:right">Anexo</span>
+          </div>
+          <sc-for list="{{ nfLista }}" as="n" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:minmax(0,1.6fr) 78px 92px minmax(0,1.2fr) 88px 48px;gap:8px;padding:13px 0;font-size:13.5px;border-bottom:1px solid rgba(255,255,255,.05);align-items:center">
+              <div style="min-width:0">
+                <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">NF {{ n.num }}</div>
+                <div style="font-size:11.5px;color:#8b9174;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.emitente }} · emissão {{ n.emissao }}</div>
+              </div>
+              <span style="{{ n.destStyle }}">{{ n.dest }}</span>
+              <span style="text-align:right;font-weight:500">{{ n.valor }}</span>
+              <div style="min-width:0">
+                <div style="font-size:12.5px;color:#c3c6ac;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.parcelasResumo }}</div>
+                <div style="font-size:11.5px;color:#8b9174;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ n.proxima }}</div>
+              </div>
+              <span style="display:flex;justify-content:flex-end"><span style="{{ n.statusStyle }}">{{ n.status }}</span></span>
+              <span title="{{ n.arquivo }}" style="text-align:right;color:#93a35f;font-size:12.5px;cursor:pointer" style-hover="color:#b7c880">▤ ver</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;font-size:12.5px;color:#8b9174">
+            <span>{{ nfRodape }}</span>
+            <span style="font-family:'Instrument Serif',serif;font-size:21px;color:#edeade">{{ nfTotalFiltro }}</span>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:12px 16px;border-radius:10px;background:rgba(147,163,95,.07);border:1px solid rgba(147,163,95,.18);font-size:12.5px;color:#c3c6ac;line-height:1.6">▤ Arquivos salvos em <strong style="color:#edeade">Drive compartilhado / Villa Serenità / notas fiscais / 2026 / [destinatário]</strong> — uma pasta por sócio, arquivo renomeado como <span style="font-family:ui-monospace,monospace">NF-numero-emitente.pdf</span>.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isSafra }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Safras">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Configuração de safra</h1>
+            <div style="font-size:13px;color:#8b9174;margin-top:4px">ciclo, expectativa de colheita e calendário das etapas — alimenta a tela do Café</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span onClick="{{ safraNova }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="border-color:#93a35f;color:#b7c880">＋ Nova safra</span>
+            <span onClick="{{ safraSalvar }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">Salvar configuração</span>
+          </div>
+        </div>
+        <sc-if value="{{ safraSalvo }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:16px;padding:12px 16px;border-radius:10px;background:rgba(125,154,74,.1);border:1px solid rgba(125,154,74,.3);font-size:12.5px;color:#a3c47d">✓ Configuração da safra {{ safraAno }} salva — a tela do Café já reflete as novas datas.</div>
+        </sc-if>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:20px;align-items:start">
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px;min-width:0">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 4px">Identificação do ciclo</h2>
+            <div style="font-size:12px;color:#8b9174;line-height:1.5">Define o período que os apontamentos e custos serão vinculados.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px">
+              <sc-for list="{{ safraCamposCiclo }}" as="c" hint-placeholder-count="6">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:{{ c.span }}">{{ c.label }}
+                  <input type="{{ c.tipo }}" value="{{ c.value }}" onChange="{{ c.onChange }}" placeholder="{{ c.ph }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                </label>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px 22px;min-width:0">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0 0 4px">Expectativa da colheita</h2>
+            <div style="font-size:12px;color:#8b9174;line-height:1.5">Base para a projeção de receita e comparação com o realizado.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px">
+              <sc-for list="{{ safraCamposExpect }}" as="c" hint-placeholder-count="3">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:{{ c.span }}">{{ c.label }}
+                  <input value="{{ c.value }}" onChange="{{ c.onChange }}" placeholder="{{ c.ph }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                </label>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px">
+              <sc-for list="{{ safraProjecao }}" as="p" hint-placeholder-count="3">
+                <div style="padding:13px 14px;border-radius:10px;background:rgba(255,255,255,.04)">
+                  <div style="font-size:10.5px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ p.label }}</div>
+                  <div style="font-family:'Instrument Serif',serif;font-size:21px;margin-top:5px;color:{{ p.cor }}">{{ p.valor }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:20px 22px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+            <h2 style="font-family:'Instrument Serif',serif;font-size:19px;font-weight:400;margin:0">Calendário das etapas</h2>
+            <span style="font-size:12.5px;color:#8b9174">as datas alimentam a linha de etapas na tela do Café</span>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 1fr 1fr 116px;gap:12px;padding:14px 0 10px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)">
+            <span>Etapa</span><span>Início</span><span>Término</span><span style="text-align:right">Situação</span>
+          </div>
+          <sc-for list="{{ safraEtapas }}" as="e" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 1fr 1fr 116px;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:center">
+              <span style="font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.nome }}</span>
+              <input type="date" value="{{ e.ini }}" onChange="{{ e.iniOnChange }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:9px 11px;color:#edeade;font-family:inherit;font-size:13px">
+              <input type="date" value="{{ e.fim }}" onChange="{{ e.fimOnChange }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:9px 11px;color:#edeade;font-family:inherit;font-size:13px">
+              <span style="display:flex;justify-content:flex-end"><span style="{{ e.statusStyle }}">{{ e.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isConcil }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Conciliação">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <h1 style="font-family:'Instrument Serif',serif;font-size:34px;font-weight:400;margin:0">Conciliação bancária</h1>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:13px;color:#8b9174;white-space:nowrap">{{ concilConta }}</span>
+            <span onClick="{{ importarOfx }}" style="padding:8px 14px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap" style-hover="background:#a8b76e">⇪ Importar extrato OFX</span>
+          </div>
+        </div>
+
+        <sc-if value="{{ semOfx }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ importarOfx }}" style="margin-top:24px;padding:64px 24px;border-radius:14px;border:1px dashed rgba(147,163,95,.4);background:rgba(147,163,95,.04);text-align:center;cursor:pointer" style-hover="border-color:#93a35f;background:rgba(147,163,95,.09)">
+            <div style="font-size:30px;color:#93a35f">⇪</div>
+            <div style="font-family:'Instrument Serif',serif;font-size:22px;margin-top:12px">Importe o extrato .OFX do banco</div>
+            <div style="font-size:13px;color:#8b9174;margin-top:8px;line-height:1.7">Arraste o arquivo aqui ou clique para escolher · Sicoob, Banestes e Nubank PJ<br>Cada linha do extrato será comparada com os lançamentos já registrados no aplicativo.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ temOfx }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px">
+              <sc-for list="{{ concilKpis }}" as="k" hint-placeholder-count="4">
+                <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 20px">
+                  <div style="font-size:11.5px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ k.label }}</div>
+                  <div style="font-family:'Instrument Serif',serif;font-size:25px;margin-top:6px;color:{{ k.color }}">{{ k.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 18px;border-radius:10px;background:rgba(147,163,95,.07);border:1px solid rgba(147,163,95,.18);font-size:12.5px;color:#c3c6ac;flex-wrap:wrap">
+              <span style="color:#b7c880">▤</span><strong style="color:#edeade">extrato-sicoob-072026.ofx</strong>
+              <span>01/07 a 31/07/2026 · {{ concilQtd }} lançamentos importados</span>
+              <span onClick="{{ conciliarTodos }}" style="margin-left:auto;font-size:12.5px;padding:6px 13px;border-radius:8px;border:1px solid rgba(147,163,95,.4);color:#b7c880;cursor:pointer" style-hover="background:rgba(147,163,95,.16)">Conciliar todas as sugestões</span>
+            </div>
+            <div style="background:#212a14;border:1px solid rgba(255,255,255,.07);border-radius:12px;margin-top:14px;padding:8px 22px 16px;overflow-x:auto">
+              <div style="display:grid;grid-template-columns:1.1fr 1.2fr 130px 190px;gap:14px;padding:12px 0;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08);min-width:940px">
+                <span>Linha do extrato</span><span>Correspondência no aplicativo</span><span style="text-align:right">Valor</span><span style="text-align:right">Situação</span>
+              </div>
+              <sc-for list="{{ concilLinhas }}" as="l" hint-placeholder-count="9">
+                <div style="display:grid;grid-template-columns:1.1fr 1.2fr 130px 190px;gap:14px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:center;min-width:940px">
+                  <div style="min-width:0">
+                    <div style="font-size:13px;font-family:ui-monospace,monospace;color:#edeade;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.desc }}</div>
+                    <div style="font-size:11.5px;color:#8b9174;margin-top:3px">{{ l.data }} · {{ l.doc }}</div>
+                  </div>
+                  <div style="min-width:0;padding-left:14px;border-left:2px solid {{ l.barra }}">
+                    <div style="font-size:13.5px;color:{{ l.sugColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.sug }}</div>
+                    <div style="font-size:11.5px;color:#8b9174;margin-top:3px">{{ l.sugMeta }}</div>
+                  </div>
+                  <span style="text-align:right;font-weight:500;color:{{ l.valorColor }}">{{ l.valor }}</span>
+                  <div style="display:flex;justify-content:flex-end;gap:8px;align-items:center">
+                    <span style="{{ l.statusStyle }}">{{ l.status }}</span>
+                    <span onClick="{{ l.acao }}" style="{{ l.btnStyle }}" style-hover="border-color:#93a35f;color:#b7c880">{{ l.btn }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:18px;margin-top:14px;font-size:12px;color:#8b9174;align-items:center;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#7d9a4a"></span>conciliado</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#93a35f;opacity:.45"></span>sugestão automática (data + valor)</span>
+              <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#c2705a"></span>sem correspondência — criar lançamento</span>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </main>
+
+  <sc-if value="{{ modalAberto }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(10,14,6,.72);display:grid;place-items:center;padding:32px;z-index:50">
+      <div style="width:100%;max-width:560px;background:#212a14;border:1px solid rgba(147,163,95,.25);border-radius:16px;padding:26px 28px;box-shadow:0 24px 60px rgba(0,0,0,.5);max-height:86vh;overflow-y:auto">
+
+        <sc-if value="{{ modalIsNova }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Nova reserva</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="margin-top:22px">
+              <div style="font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Acomodações <span style="color:#c2705a">*</span> <span style="text-transform:none;letter-spacing:0;color:#6f7658">— selecione uma ou mais para fechar pacote</span></div>
+              <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+                <sc-for list="{{ accChips }}" as="a" hint-placeholder-count="3">
+                  <span onClick="{{ a.onClick }}" style="{{ a.style }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ a.cor }}"></span>{{ a.nome }}</span>
+                </sc-for>
+              </div>
+              <div style="margin-top:9px;font-size:12px;color:{{ pacoteCor }}">{{ pacoteAviso }}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Canal de origem
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0"><option>Airbnb</option><option>WhatsApp</option><option>Instagram @villaserenita</option><option>Indicação</option></select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Check-in
+                <input type="date" value="2026-08-07" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Check-out
+                <input type="date" value="2026-08-10" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Hóspede responsável <span style="color:#c2705a">*</span>
+                <select value="{{ resHospede }}" onChange="{{ resHospedeOnChange }}" style="background:#161c0d;border:1px solid {{ resHospedeBorda }};border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <option value="">Selecione o hóspede cadastrado…</option>
+                  <sc-for list="{{ opcoesHospede }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Número de hóspedes
+                <input type="number" min="1" max="24" value="4" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor total
+                <input placeholder="R$ 1.850" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Sinal antecipado
+                <input placeholder="50% — R$ 925" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+            </div>
+            <div style="margin-top:16px;display:flex;align-items:center;gap:10px;padding:12px 15px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12.5px;color:#8b9174;line-height:1.5"><span style="color:#a3c47d">✓</span><span>Lançamento predefinido: categoria <strong style="color:#edeade">Hospedagem — diárias</strong> · centro <strong style="color:#edeade">Hospedagem</strong></span></div>
+            <div style="margin-top:12px;padding:14px 16px;border-radius:10px;border:1px dashed rgba(147,163,95,.4);font-size:12.5px;color:#8b9174;text-align:center;cursor:pointer;line-height:1.6" style-hover="border-color:#93a35f;color:#b7c880">Anexar comprovante do sinal agora <span style="font-size:11px">(opcional — vai para o Drive compartilhado)</span></div>
+            <sc-if value="{{ resSemHospede }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:13px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c;line-height:1.5">Selecione o hóspede responsável — o cadastro é obrigatório para salvar a reserva.</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarReserva }}" style="padding:10px 18px;border-radius:9px;background:{{ resSalvarBg }};color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Salvar reserva</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsAnexo }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Anexar comprovante</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="margin-top:22px;padding:34px 20px;border-radius:12px;border:1px dashed rgba(147,163,95,.45);text-align:center;background:rgba(147,163,95,.05);cursor:pointer" style-hover="border-color:#93a35f;background:rgba(147,163,95,.1)">
+              <div style="font-size:26px;color:#93a35f">▲</div>
+              <div style="font-size:13.5px;margin-top:10px">Arraste o arquivo aqui ou <strong style="color:#b7c880">escolha do dispositivo</strong></div>
+              <div style="font-size:11.5px;color:#8b9174;margin-top:6px">PDF, JPG ou PNG · até 10 MB</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Tipo de documento
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0"><option>Comprovante de sinal (antecipado)</option><option>Comprovante de pagamento final</option><option>Contrato de hospedagem</option><option>Nota fiscal / despesa</option><option>Documento do hóspede</option></select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Vincular a
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0"><option>Reserva — Júlia R. · 24–28 jul</option><option>Reserva — Grupo Vitória · 25–28 jul</option><option>Despesa — safra 26/27</option><option>Dívida — trator Valtra</option></select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor do comprovante
+                <input placeholder="R$ 1.300" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Data do pagamento
+                <input type="date" value="2026-07-05" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+            </div>
+            <div style="margin-top:16px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#c3c6ac;padding:12px 14px;border-radius:9px;background:rgba(255,255,255,.04)">
+              <span style="color:#a3c47d">✓</span> Salvar em <strong style="color:#edeade">Drive compartilhado / Villa Serenità / reservas / 2026</strong> e marcar o sinal como recebido
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ fecharModal }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Anexar e confirmar</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsLanc }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0;display:flex;align-items:center;gap:11px"><span style="width:9px;height:9px;border-radius:50%;background:{{ lancCor }}"></span>{{ lancTitulo }}</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Centro de custo/receita
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesCentro }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Categoria
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesCategoria }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Conta bancária
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesConta }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Data
+                <input type="date" value="2026-07-30" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Descrição
+                <input placeholder="{{ lancPlaceholder }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor
+                <input placeholder="{{ lancValorPh }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ lancVinculoLabel }}
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesVinculo }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+            </div>
+            <div style="margin-top:14px;padding:11px 14px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12.5px;color:#8b9174;line-height:1.5">Resultado rateado igualmente entre os 4 sócios (25% cada). Aportes e devoluções são registrados à parte, na aba Sócios.</div>
+            <div style="margin-top:16px;padding:14px 16px;border-radius:10px;border:1px dashed rgba(147,163,95,.4);font-size:12.5px;color:#8b9174;text-align:center;cursor:pointer;line-height:1.6" style-hover="border-color:#93a35f;color:#b7c880">Anexar nota fiscal ou comprovante <span style="font-size:11px">(vai para o Drive compartilhado)</span></div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarLanc }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Lançar</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsSenha }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Autorização do administrador</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="margin-top:16px;padding:14px 16px;border-radius:10px;background:rgba(194,112,90,.1);border:1px solid rgba(194,112,90,.28);font-size:13px;color:#d2917c;line-height:1.6">A prestação de contas do período já foi gerada. Desfazer esta conciliação altera um mês fechado e exige senha de administrador.</div>
+            <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;margin-top:18px">Senha de administrador
+              <input type="password" value="{{ senhaValor }}" onChange="{{ senhaOnChange }}" placeholder="••••••••" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;letter-spacing:.1em">
+            </label>
+            <div style="margin-top:10px;font-size:11.5px;color:#6f7658;line-height:1.5">A ação fica registrada no histórico com data, hora e usuário.</div>
+            <sc-if value="{{ senhaErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:12px;font-size:12.5px;color:#d2917c">Senha incorreta — tente novamente.</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ confirmarSenha }}" style="padding:10px 18px;border-radius:9px;background:#c2705a;color:#20100b;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#d2917c">Desfazer conciliação</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsCad }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">{{ cadFormTitulo }}</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="font-size:12.5px;color:#8b9174;line-height:1.5;margin-top:6px">{{ cadFormDesc }}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+              <sc-for list="{{ cadCampos }}" as="c" hint-placeholder-count="4">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">{{ c.label }}
+                  <sc-if value="{{ c.isSelect }}" hint-placeholder-val="{{ false }}">
+                    <select value="{{ c.value }}" onChange="{{ c.onChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                      <sc-for list="{{ c.opcoes }}" as="o" hint-placeholder-count="2">
+                        <option value="{{ o }}">{{ o }}</option>
+                      </sc-for>
+                    </select>
+                  </sc-if>
+                  <sc-if value="{{ c.isInput }}" hint-placeholder-val="{{ true }}">
+                    <input value="{{ c.value }}" onChange="{{ c.onChange }}" placeholder="{{ c.ph }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  </sc-if>
+                </label>
+              </sc-for>
+            </div>
+            <sc-if value="{{ cadTemErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:14px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c;line-height:1.5">{{ cadErro }}</div>
+            </sc-if>
+            <div style="margin-top:14px;font-size:11.5px;color:#6f7658">Campos com <span style="color:#c2705a">*</span> são obrigatórios.</div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ cadAdicionar }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Salvar cadastro</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsAporte }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">{{ aporteTitulo }}</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="font-size:12.5px;color:#8b9174;line-height:1.6;margin-top:6px">{{ aporteDesc }}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Sócio <span style="color:#c2705a">*</span>
+                <select value="{{ aporteSocio }}" onChange="{{ aporteSocioOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ nomesSocios }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor <span style="color:#c2705a">*</span>
+                <input value="{{ aporteValor }}" onChange="{{ aporteValorOnChange }}" placeholder="R$ 10.000" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Data
+                <input type="date" value="2026-08-01" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Conta bancária
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesConta }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Observação
+                <input value="{{ aporteObs }}" onChange="{{ aporteObsOnChange }}" placeholder="{{ aporteObsPh }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+              </label>
+            </div>
+            <div style="margin-top:16px;padding:12px 15px;border-radius:9px;background:rgba(255,255,255,.04);font-size:12.5px;color:#8b9174;line-height:1.6">{{ aporteNota }}</div>
+            <sc-if value="{{ aporteTemErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:13px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c">{{ aporteErro }}</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarAporte }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">{{ aporteBtn }}</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsDivida }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Novo contrato de dívida</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="font-size:12.5px;color:#8b9174;line-height:1.6;margin-top:6px">Provisiona todas as parcelas do contrato — elas passam a aparecer como despesas programadas.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+              <sc-for list="{{ divCampos }}" as="c" hint-placeholder-count="6">
+                <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:{{ c.span }}">{{ c.label }}
+                  <sc-if value="{{ c.isSelect }}" hint-placeholder-val="{{ false }}">
+                    <select value="{{ c.value }}" onChange="{{ c.onChange }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                      <sc-for list="{{ c.opcoes }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                    </select>
+                  </sc-if>
+                  <sc-if value="{{ c.isInput }}" hint-placeholder-val="{{ true }}">
+                    <input type="{{ c.tipo }}" value="{{ c.value }}" onChange="{{ c.onChange }}" placeholder="{{ c.ph }}" style="width:100%;box-sizing:border-box;min-width:0;background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  </sc-if>
+                </label>
+              </sc-for>
+            </div>
+            <div style="margin-top:16px;padding:13px 16px;border-radius:10px;background:rgba(255,255,255,.04);font-size:13px;color:#c3c6ac;line-height:1.7">{{ divPrevia }}</div>
+            <sc-if value="{{ divTemErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:13px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c">{{ divErro }}</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarDivida }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Provisionar contrato</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsTransf }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Transferência entre contas</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="font-size:12.5px;color:#8b9174;line-height:1.6;margin-top:6px">Um único lançamento gera a saída na conta de origem e a entrada na conta de destino.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Conta de origem (saída) <span style="color:#c2705a">*</span>
+                <select value="{{ transfOrigem }}" onChange="{{ transfOrigemOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesConta }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Conta de destino (entrada) <span style="color:#c2705a">*</span>
+                <select value="{{ transfDestino }}" onChange="{{ transfDestinoOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesConta }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor <span style="color:#c2705a">*</span>
+                <input value="{{ transfValor }}" onChange="{{ transfValorOnChange }}" placeholder="R$ 5.000" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Data
+                <input type="date" value="2026-08-01" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Observação
+                <input value="{{ transfObs }}" onChange="{{ transfObsOnChange }}" placeholder="Ex.: reserva de caixa para parcela do trator" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+              </label>
+            </div>
+            <div style="margin-top:16px;padding:13px 16px;border-radius:10px;background:rgba(255,255,255,.04);font-size:13px;color:#c3c6ac;line-height:1.7">{{ transfPreviaSaida }}<br>{{ transfPreviaEntrada }}</div>
+            <div style="margin-top:10px;font-size:11.5px;color:#6f7658;line-height:1.5">Transferência não é receita nem despesa — não entra no resultado do mês nem no rateio, apenas nos saldos das contas e na conciliação.</div>
+            <sc-if value="{{ transfTemErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:13px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c">{{ transfErro }}</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarTransf }}" style="padding:10px 18px;border-radius:9px;background:#93a35f;color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Registrar transferência</span>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalIsNf }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline">
+              <h2 style="font-family:'Instrument Serif',serif;font-size:24px;font-weight:400;margin:0">Lançar nota fiscal</h2>
+              <span onClick="{{ fecharModal }}" style="font-size:18px;color:#8b9174;cursor:pointer;line-height:1" style-hover="color:#edeade">✕</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Número da nota <span style="color:#c2705a">*</span>
+                <input value="{{ nfNum }}" onChange="{{ nfNumOnChange }}" placeholder="Ex.: 18452" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Destinatário <span style="color:#c2705a">*</span>
+                <select value="{{ nfDest }}" onChange="{{ nfDestOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ nfDestinatarios }}" as="o" hint-placeholder-count="2"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase;grid-column:span 2">Emitente (fornecedor) <span style="color:#c2705a">*</span>
+                <select value="{{ nfEmitente }}" onChange="{{ nfEmitenteOnChange }}" style="background:#161c0d;border:1px solid {{ nfEmitenteBorda }};border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <option value="">Selecione o fornecedor cadastrado…</option>
+                  <sc-for list="{{ nfFornecedores }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Data de emissão <span style="color:#c2705a">*</span>
+                <input type="date" value="{{ nfEmissao }}" onChange="{{ nfEmissaoOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Valor total <span style="color:#c2705a">*</span>
+                <input value="{{ nfValor }}" onChange="{{ nfValorOnChange }}" placeholder="R$ 4.120" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px">
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Centro de custo <span style="color:#c2705a">*</span>
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ opcoesCentro }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+              <label style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Categoria <span style="color:#c2705a">*</span>
+                <select style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:10px 12px;color:#edeade;font-family:inherit;font-size:13.5px;text-transform:none;letter-spacing:0">
+                  <sc-for list="{{ nfCategorias }}" as="o" hint-placeholder-count="4"><option value="{{ o }}">{{ o }}</option></sc-for>
+                </select>
+              </label>
+            </div>
+
+            <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <div style="font-size:11px;color:#8b9174;letter-spacing:.06em;text-transform:uppercase">Parcelamento — {{ nfQtdParcelas }}</div>
+              <span onClick="{{ nfAddParcela }}" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid rgba(147,163,95,.45);color:#b7c880;cursor:pointer;white-space:nowrap" style-hover="background:rgba(147,163,95,.16)">＋ Inserir nova parcela</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+              <sc-for list="{{ nfParcelas }}" as="p" hint-placeholder-count="1">
+                <div style="display:grid;grid-template-columns:44px 1fr 1fr 24px;gap:10px;align-items:center">
+                  <span style="font-size:12px;color:#8b9174">{{ p.rotulo }}</span>
+                  <input type="date" value="{{ p.venc }}" onChange="{{ p.vencOnChange }}" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:9px 11px;color:#edeade;font-family:inherit;font-size:13px">
+                  <input value="{{ p.valor }}" onChange="{{ p.valorOnChange }}" placeholder="R$ 0" style="background:#161c0d;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:9px 11px;color:#edeade;font-family:inherit;font-size:13px">
+                  <span onClick="{{ p.remover }}" title="Remover parcela" style="{{ p.removerStyle }}">✕</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top:9px;font-size:12px;color:{{ nfSomaCor }};line-height:1.5">{{ nfSomaAviso }}</div>
+
+            <div onClick="{{ nfAnexar }}" style="margin-top:16px;padding:16px;border-radius:10px;border:1px dashed {{ nfAnexoBorda }};background:{{ nfAnexoBg }};text-align:center;cursor:pointer;line-height:1.6" style-hover="border-color:#93a35f">
+              <div style="font-size:13px;color:{{ nfAnexoCor }}">{{ nfAnexoTexto }}</div>
+              <div style="font-size:11.5px;color:#8b9174;margin-top:4px">{{ nfAnexoMeta }}</div>
+            </div>
+            <sc-if value="{{ nfTemErro }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:13px;padding:10px 13px;border-radius:8px;background:rgba(194,112,90,.14);border:1px solid rgba(194,112,90,.32);font-size:12.5px;color:#d2917c;line-height:1.5">{{ nfErro }}</div>
+            </sc-if>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+              <span onClick="{{ fecharModal }}" style="padding:10px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;font-size:13px;cursor:pointer" style-hover="border-color:#93a35f">Cancelar</span>
+              <span onClick="{{ salvarNf }}" style="padding:10px 18px;border-radius:9px;background:{{ nfSalvarBg }};color:#161c0d;font-weight:600;font-size:13px;cursor:pointer" style-hover="background:#a8b76e">Salvar nota fiscal</span>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;mostrarValores&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Privacidade&quot;},&quot;acomodacaoFiltro&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;Todas&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'dash', finTab: 'rec', mes: 6, canal: 'todos', acc: 'todas', modal: null,
+    lancTipo: 'rec', cadTab: 'cat', cadForm: {}, ofx: false, concil: {},
+    cats: [
+      { nome: 'Hospedagem — diárias', tipo: 'Receita' }, { nome: 'Venda de café', tipo: 'Receita' },
+      { nome: 'Outras receitas', tipo: 'Receita' }, { nome: 'Mão de obra', tipo: 'Despesa' },
+      { nome: 'Insumos', tipo: 'Despesa' }, { nome: 'Contas fixas', tipo: 'Despesa' },
+      { nome: 'Manutenção', tipo: 'Despesa' }, { nome: 'Financiamento', tipo: 'Despesa' },
+    ],
+    centros: [
+      { nome: 'Hospedagem', tipo: 'Receita e despesa', obs: 'Rifugio, Vecchia e Verona' },
+      { nome: 'Café', tipo: 'Receita e despesa', obs: 'Safra 26/27' },
+      { nome: 'Propriedade (comum)', tipo: 'Despesa', obs: 'Rateio entre as frentes' },
+    ],
+    hospedes: [
+      { nome: 'Júlia Rossetti', cpf: '128.440.917-05', contato: '(27) 99812-4410', email: 'julia.rossetti@email.com', origem: 'Instagram' },
+      { nome: 'Marcos Vitório (grupo)', cpf: '074.223.187-30', contato: '(27) 99741-2288', email: '', origem: 'WhatsApp' },
+      { nome: 'Fam. Sartori', cpf: '311.905.446-22', contato: 'chat Airbnb', email: 'sartori.fam@email.com', origem: 'Airbnb' },
+      { nome: 'Luiz & Marta Bonfim', cpf: '502.118.334-91', contato: '(28) 99930-1177', email: '', origem: 'WhatsApp' },
+    ],
+    contas: [
+      { banco: 'Sicoob', apelido: 'Conta movimento', tipo: 'Corrente', saldo: '38.420' },
+      { banco: 'Banestes', apelido: 'Conta café', tipo: 'Corrente', saldo: '12.870' },
+      { banco: 'Nubank PJ', apelido: 'Reservas hospedagem', tipo: 'Pagamento', saldo: '6.310' },
+    ],
+    clifor: [
+      { nome: 'Cooperativa Pronova', relacao: 'Cliente', doc: '27.114.902/0001-40', contato: '(27) 3259-1100', obs: 'Compra de café em coco e beneficiado' },
+      { nome: 'Exportadora Tristão', relacao: 'Cliente', doc: '28.030.117/0001-08', contato: 'comercial@tristao.com.br', obs: 'Cereja descascado — lote export' },
+      { nome: 'Torrefação Serra Café', relacao: 'Cliente', doc: '31.887.220/0001-55', contato: '(27) 99604-3311', obs: 'Microlotes' },
+      { nome: 'Agropecuária Serrana', relacao: 'Fornecedor', doc: '09.442.760/0001-12', contato: '(27) 3259-2244', obs: 'Adubo, corretivo e defensivos' },
+      { nome: 'José Aparecido da Costa', relacao: 'Fornecedor', doc: '084.552.117-90', contato: '(27) 99881-7042', obs: 'Caseiro — diarista fixo' },
+      { nome: 'Mário R. da Silva', relacao: 'Fornecedor', doc: '117.209.884-31', contato: '(28) 99712-5580', obs: 'Empreiteiro da turma de colheita' },
+    ],
+    safra: {
+      ano: '2026/27', inicio: '2025-09-01', fim: '2026-10-31', area: '18', talhoes: '6',
+      variedades: 'Catuaí Vermelho 144, Catucaí 785-15', sacasPrev: '165', precoSaca: '1420', custoPrev: '52000',
+      etapas: [
+        { nome: 'Florada', ini: '2025-09-01', fim: '2025-10-31' },
+        { nome: 'Granação', ini: '2025-11-01', fim: '2026-03-31' },
+        { nome: 'Maturação', ini: '2026-04-01', fim: '2026-05-31' },
+        { nome: 'Colheita', ini: '2026-06-01', fim: '2026-08-22' },
+        { nome: 'Secagem', ini: '2026-07-01', fim: '2026-09-30' },
+        { nome: 'Beneficiamento', ini: '2026-08-01', fim: '2026-10-31' },
+      ],
+    },
+    transferencias: [
+      { data: '28/07', origem: 'Sicoob · Conta movimento', destino: 'Banestes · Conta café', valor: 12000, obs: 'Provisão para insumos da safra' },
+      { data: '15/07', origem: 'Nubank PJ · Reservas hospedagem', destino: 'Sicoob · Conta movimento', valor: 4800, obs: 'Repasse dos sinais recebidos no mês' },
+      { data: '02/07', origem: 'Sicoob · Conta movimento', destino: 'Nubank PJ · Reservas hospedagem', valor: 3000, obs: 'Reserva de caixa para limpeza e insumos' },
+    ],
+    notas: [
+      { num: '18452', emitente: 'Agropecuária Serrana', dest: 'Lucas Hoffmann Tótola', emissao: '2026-07-22', arquivo: 'NF-18452-agropecuaria-serrana.pdf',
+        parcelas: [{ venc: '2026-07-22', valor: 4120, pago: true }] },
+      { num: '9013', emitente: 'Casa do Trator ES', dest: 'Michel Hoffmann Tótola', emissao: '2026-07-10', arquivo: 'NF-9013-casa-do-trator.pdf',
+        parcelas: [{ venc: '2026-07-10', valor: 2967, pago: true }, { venc: '2026-08-09', valor: 2967, pago: false }, { venc: '2026-09-08', valor: 2966, pago: false }] },
+      { num: '3320', emitente: 'Serralheria Santa Teresa', dest: 'Michel Hoffmann Tótola', emissao: '2026-06-28', arquivo: 'NF-3320-serralheria-santa-teresa.pdf',
+        parcelas: [{ venc: '2026-06-28', valor: 1325, pago: true }, { venc: '2026-07-28', valor: 1325, pago: false }] },
+      { num: '45120', emitente: 'Comercial Elétrica Timbuí', dest: 'Lucas Hoffmann Tótola', emissao: '2026-07-30', arquivo: 'NF-45120-comercial-eletrica-timbui.pdf',
+        parcelas: [{ venc: '2026-07-30', valor: 690, pago: true }, { venc: '2026-08-29', valor: 690, pago: false }] },
+      { num: '20977', emitente: 'Agropecuária Serrana', dest: 'Lucas Hoffmann Tótola', emissao: '2026-05-14', arquivo: 'NF-20977-agropecuaria-serrana.pdf',
+        parcelas: [{ venc: '2026-05-14', valor: 3480, pago: true }] },
+      { num: '1188', emitente: 'Transportadora Vale do Canaã', dest: 'Michel Hoffmann Tótola', emissao: '2026-07-31', arquivo: 'NF-1188-transportadora-vale-do-canaa.pdf',
+        parcelas: [{ venc: '2026-08-05', valor: 1240, pago: false }] },
+    ],
+    aportes: [
+      { socio: 'Gilson Tótola', tipo: 'Aporte', valor: 40000, data: '12/02', obs: 'Entrada para reforma da Casa Verona' },
+      { socio: 'Lucas Hoffmann Tótola', tipo: 'Aporte', valor: 18000, data: '03/04', obs: 'Capital de giro da safra 26/27' },
+      { socio: 'Rosimere Hoffmann', tipo: 'Aporte', valor: 12000, data: '19/05', obs: 'Compra de despolpador' },
+      { socio: 'Gilson Tótola', tipo: 'Devolução', valor: 15000, data: '08/07', obs: 'Devolução parcial após venda à Tristão' },
+    ],
+  };
+  fmt(v) {
+    if ((this.props.mostrarValores ?? true) === false) return 'R$ ••••';
+    return 'R$ ' + v.toLocaleString('pt-BR');
+  }
+  montarReserva(b, { ACC, CANAL, MES_CURTO, fmt }) {
+    const [acc, canal, hospede, mes, dia, noites, valor, status] = b;
+    const DIA_SEM = ['dom','seg','ter','qua','qui','sex','sáb'];
+    const dtIn = new Date(2026, mes, dia), dtOut = new Date(2026, mes, dia + noites);
+    const dd = d => DIA_SEM[d.getDay()]+', '+d.getDate()+' '+MES_CURTO[d.getMonth()];
+    const p = n => String(n).padStart(2,'0');
+    const diaria = Math.round((valor - 240) / noites);
+    const sinal = Math.round(valor * 0.5), limpeza = 240 + Math.round(noites * 25);
+    const contatos = { airbnb: 'Reserva Airbnb HM'+(1000+dia*7)+' · chat no app', whatsapp: 'WhatsApp: (27) 99XXX-XXXX', instagram: 'Instagram @villaserenita · DM · WhatsApp: (27) 99XXX-XXXX' };
+    const origem = { airbnb: 'Reserva instantânea recebida pelo Airbnb', whatsapp: 'Contato direto no WhatsApp pedindo disponibilidade', instagram: 'Contato por DM no Instagram @villaserenita' };
+    const notas = {
+      airbnb: 'Hóspede com boas avaliações. Chegada prevista no fim da tarde — deixar orientação de acesso na portaria.',
+      whatsapp: 'Grupo já se hospedou antes. Pediram café da manhã reforçado no sábado e uso da churrasqueira.',
+      instagram: 'Vieram pelo perfil, pediram lareira acesa e indicação de trilhas. Deixar cortesia de boas-vindas.',
+    };
+    return {
+      hospede, acomodacao: ACC[acc].nome,
+      status: status + (status==='Pré-reserva' ? ' · aguardando sinal' : ' · sinal pago'),
+      estadia: [
+        { label:'Check-in', valor: dd(dtIn)+' · 15h' },
+        { label:'Check-out', valor: dd(dtOut)+' · 11h' },
+        { label:'Noites', valor: String(noites) },
+        { label:'Canal', valor: CANAL[canal].label },
+      ],
+      timeline: [
+        { data: p(Math.max(1, dia-22))+'/'+p(mes+1), color: CANAL[canal].bg, texto: origem[canal] },
+        { data: p(Math.max(1, dia-20))+'/'+p(mes+1), color:'#7d9a4a', texto:'Orçamento enviado e aceito' },
+        { data: p(Math.max(1, dia-19))+'/'+p(mes+1), color:'#a3c47d', texto:'Sinal de 50% recebido via Pix — '+fmt(sinal) },
+        { data: p(Math.max(1, dia-2))+'/'+p(mes+1), color:'#b7c880', texto:'Lembrete de check-in + instruções de chegada enviados' },
+      ],
+      fin: [
+        { label: noites+' noites × '+fmt(diaria), valor: fmt(diaria*noites), color:'#c3c6ac', peso:'400' },
+        { label:'Taxa de limpeza', valor: fmt(240), color:'#c3c6ac', peso:'400' },
+        { label:'Sinal recebido (Pix)', valor:'− '+fmt(sinal), color:'#a3c47d', peso:'500' },
+        { label:'Custo limpeza + insumos', valor:'− '+fmt(limpeza), color:'#a9553f', peso:'400' },
+      ],
+      liquido: fmt(valor - limpeza),
+      contato: contatos[canal] + ' · Vitória, ES',
+      nota: notas[canal],
+    };
+  }
+  renderVals() {
+    const st = this.state, fmt = this.fmt.bind(this);
+    const go = s => () => this.setState({ screen: s });
+    const abrir = b => () => this.setState({ screen: 'res', resSel: b });
+    const MES_REF = 6; // mês de referência do painel (julho/2026)
+    const ACC = { rifugio: { nome: 'Rifugio Fieline', color: '#93a35f' }, vecchia: { nome: 'Casa Vecchia', color: '#d8dcc4' }, verona: { nome: 'Casa Verona', color: '#a9553f' } };
+    const CANAL = {
+      airbnb: { label: 'Airbnb', bg: '#c2705a', fg: '#20100b', chipBg: 'rgba(194,112,90,.2)', chipFg: '#d2917c' },
+      whatsapp: { label: 'WhatsApp', bg: '#8aab55', fg: '#161c0d', chipBg: 'rgba(138,171,85,.2)', chipFg: '#a3c47d' },
+      instagram: { label: 'Instagram', bg: '#cbd0b0', fg: '#161c0d', chipBg: 'rgba(203,208,176,.16)', chipFg: '#dfe3cb' },
+    };
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const navDefGrupos = [
+      ['Operação', [['dash','◈','Visão geral'],['cal','▦','Calendário'],['lista','◍','Reservas'],['cafe','✳','Café']]],
+      ['Financeiro', [['fin','◎','Lançamentos'],['nf','▣','Notas fiscais'],['concil','⇄','Conciliação']]],
+      ['Configuração', [['cad','☰','Cadastros'],['safra','❋','Safras']]],
+    ];
+    const navItem = ([id, icon, label]) => ({
+      icon, label, onClick: go(id),
+      style: `display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;cursor:pointer;${(st.screen === id || (id==='lista' && st.screen==='res')) ? 'background:rgba(147,163,95,.13);color:#b7c880;font-weight:500' : 'color:#c3c6ac'}`
+    });
+    const navGrupos = navDefGrupos.map(([titulo, itens], i) => ({ titulo, espaco: i === 0 ? '0' : '18px', itens: itens.map(navItem) }));
+    // [acomodação, canal, hóspede, mês (0-11), dia de início, noites, valor, status]
+    const TODAS = [
+      ['rifugio','airbnb','Mariana L.',6,3,3,1850,'Concluída'],['rifugio','whatsapp','Fam. Podestá',6,10,4,2400,'Concluída'],['rifugio','airbnb','Carlos & Ana',6,17,3,1850,'Concluída'],['rifugio','instagram','Júlia R.',6,24,4,2600,'Confirmada'],
+      ['vecchia','whatsapp','Fam. Bergamin',6,4,2,1100,'Concluída'],['vecchia','airbnb','Pedro M.',6,11,3,1500,'Concluída'],['vecchia','airbnb','Renata S.',6,18,2,1050,'Concluída'],['vecchia','whatsapp','Grupo Vitória',6,25,3,1680,'Confirmada'],
+      ['verona','instagram','Beatriz T.',6,3,2,980,'Concluída'],['verona','airbnb','Fam. Colnago',6,10,3,1440,'Concluída'],['verona','whatsapp','Luiz & Marta',6,24,4,1920,'Confirmada'],
+      ['rifugio','airbnb','Fam. Sartori',7,7,3,1850,'Confirmada'],['rifugio','whatsapp','Diego P.',7,21,2,1240,'Confirmada'],['rifugio','instagram','Nara & Tom',7,28,3,1980,'Pré-reserva'],
+      ['vecchia','airbnb','Helena B.',7,8,2,1100,'Confirmada'],['vecchia','whatsapp','Fam. Zanotti',7,14,3,1620,'Confirmada'],
+      ['verona','airbnb','Rafael M.',7,1,2,960,'Confirmada'],['verona','instagram','Clarice F.',7,22,2,1020,'Pré-reserva'],
+      ['rifugio','whatsapp','Fam. Merlo',5,12,3,1780,'Concluída'],['rifugio','airbnb','Sofia A.',5,26,2,1210,'Concluída'],
+      ['vecchia','airbnb','Grupo Colatina',5,5,3,1560,'Concluída'],['verona','whatsapp','Otávio L.',5,19,2,940,'Concluída'],
+    ];
+    const bookings = TODAS.filter(b => b[3]===st.mes);
+    const fBook = bookings.filter(b => st.canal==='todos'||b[1]===st.canal);
+    const accKeys = Object.keys(ACC);
+    const NDIAS = new Date(2026, st.mes+1, 0).getDate();
+    const PRIM = new Date(2026, st.mes, 1).getDay();
+    const SEM = ['D','S','T','Q','Q','S','S'];
+    const FERIADOS = { 6: [], 7: [], 5: [] }; // feriados por mês (dia do check-out do feriado)
+    const fer = FERIADOS[st.mes] || [];
+    const dow = d => new Date(2026, st.mes, d).getDay();
+    // noite "vendável": sexta e sábado (+ vésperas de feriado)
+    const vendavel = d => { const w = dow(d); return w===5 || w===6 || fer.includes(d) || fer.includes(d+1); };
+    const diasSemana = SEM.map((letra, i) => ({ letra, color: (i===0||i===5||i===6) ? '#b7c880' : '#8b9174' }));
+    const noitesVendaveis = Array.from({length: NDIAS}, (_, i) => i+1).filter(vendavel).length;
+    const calendarios = accKeys.map(k => {
+      const rs = fBook.filter(b => b[0]===k);
+      const ocupa = {};
+      rs.forEach(b => { for (let d = b[4]; d < b[4]+b[5]; d++) ocupa[d] = b; });
+      let ocupadas = 0;
+      Object.keys(ocupa).forEach(d => { if (vendavel(+d)) ocupadas++; });
+      const celulas = [];
+      for (let i = 0; i < PRIM; i++) celulas.push({ num: '', style: 'height:36px', titulo: '', hover: '' });
+      for (let d = 1; d <= NDIAS; d++) {
+        const b = ocupa[d], v = vendavel(d);
+        const base = 'height:36px;display:grid;place-items:center;font-size:12.5px;border-radius:7px;box-sizing:border-box;';
+        if (b) {
+          const primeiro = !ocupa[d-1], ultimo = !ocupa[d+1];
+          celulas.push({ num: d, titulo: b[2]+' · '+CANAL[b[1]].label, onClick: abrir(b), hover: 'filter:brightness(1.12)',
+            style: base+`background:${CANAL[b[1]].bg};color:${CANAL[b[1]].fg};font-weight:600;cursor:pointer;border-radius:${primeiro?'7px':'2px'} ${ultimo?'7px':'2px'} ${ultimo?'7px':'2px'} ${primeiro?'7px':'2px'}` });
+        } else {
+          celulas.push({ num: d, titulo: v ? 'Disponível · noite vendável' : 'Disponível', hover: 'background:rgba(255,255,255,.07)',
+            style: base+(v ? 'background:rgba(147,163,95,.09);color:#b7c880;border:1px solid rgba(147,163,95,.22)' : 'color:#6f7658') });
+        }
+      }
+      return { nome: ACC[k].nome, color: ACC[k].color, celulas,
+        ocup: noitesVendaveis ? Math.round(ocupadas/noitesVendaveis*100)+'%' : '—',
+        qtdReservas: rs.length, receita: fmt(rs.reduce((a,b) => a+b[6], 0)) };
+    });
+    let ocupTot = 0;
+    bookings.filter(b => st.acc==='todas' || b[0]===st.acc).forEach(b => { for (let d = b[4]; d < b[4]+b[5]; d++) if (vendavel(d)) ocupTot++; });
+    const capacidade = noitesVendaveis * accKeys.length;
+    const ocupPct = capacidade ? Math.round(ocupTot/capacidade*100) : 0;
+    const MES_CURTO = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const listaReservas = bookings
+      .filter(b => st.acc==='todas' || b[0]===st.acc)
+      .sort((a,b) => a[4]-b[4])
+      .map(b => ({
+        hospede: b[2], acomodacao: ACC[b[0]].nome, color: ACC[b[0]].color,
+        periodo: b[4]+' – '+(b[4]+b[5])+' '+MES_CURTO[st.mes],
+        canal: CANAL[b[1]].label, canalBg: CANAL[b[1]].chipBg, canalFg: CANAL[b[1]].chipFg,
+        status: b[7], statusColor: b[7]==='Confirmada' ? '#a3c47d' : b[7]==='Pré-reserva' ? '#b7c880' : '#8b9174',
+        valor: fmt(b[6]), onClick: abrir(b),
+      }));
+    // ocupação do mês de referência do painel — independente da navegação do calendário
+    const NDIAS_REF = new Date(2026, MES_REF+1, 0).getDate();
+    const vendavelRef = d => { const w = new Date(2026, MES_REF, d).getDay(); return w===5 || w===6; };
+    const noitesVendRef = Array.from({length: NDIAS_REF}, (_, i) => i+1).filter(vendavelRef).length;
+    let ocupRef = 0;
+    TODAS.filter(b => b[3]===MES_REF).forEach(b => { for (let d = b[4]; d < b[4]+b[5]; d++) if (vendavelRef(d)) ocupRef++; });
+    const capacidadeRef = noitesVendRef * Object.keys(ACC).length;
+    const ocupPctRef = Math.round(ocupRef/capacidadeRef*100);
+    const chip = (active) => `font-size:12.5px;padding:6px 13px;border-radius:99px;cursor:pointer;border:1px solid ${active?'#93a35f':'rgba(255,255,255,.12)'};${active?'background:rgba(147,163,95,.14);color:#b7c880':'color:#c3c6ac'}`;
+    const filtrosCanal = [['todos','Todos os canais'],['airbnb','Airbnb'],['whatsapp','WhatsApp'],['instagram','Instagram']].map(([id,label]) => ({ label, onClick: () => this.setState({canal:id}), style: chip(st.canal===id) }));
+    const filtrosAcc = [['todas','Todas'],['rifugio','Rifugio Fieline'],['vecchia','Casa Vecchia'],['verona','Casa Verona']].map(([id,label]) => ({ label, onClick: () => this.setState({acc:id}), style: chip(st.acc===id) }));
+    const proximas = TODAS
+      .filter(b => b[7] !== 'Concluída')
+      .sort((a, b) => (a[3]-b[3]) || (a[4]-b[4]))
+      .slice(0, 4)
+      .map(b => ({
+        hospede: b[2], acomodacao: ACC[b[0]].nome, color: ACC[b[0]].color,
+        canal: CANAL[b[1]].label, canalBg: CANAL[b[1]].chipBg, canalFg: CANAL[b[1]].chipFg,
+        periodo: b[4]+' – '+(b[4]+b[5])+' '+MES_CURTO[b[3]], valor: fmt(b[6]), onClick: abrir(b),
+      }));
+    const finTabs = [['rec','Receitas'],['desp','Despesas'],['transf','Transferências'],['div','Dívidas'],['soc','Prestação de contas']].map(([id,label]) => ({ label, onClick: () => this.setState({finTab:id}), style: `font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer;${st.finTab===id?'background:rgba(147,163,95,.15);color:#b7c880;font-weight:500':'color:#8b9174'}` }));
+    const frente = f => f==='hosp' ? { frente:'Hospedagem', frenteBg:'rgba(111,143,122,.14)', frenteFg:'#9bb8a4' } : f==='cafe' ? { frente:'Café', frenteBg:'rgba(147,163,95,.14)', frenteFg:'#b7c880' } : { frente:'Propriedade', frenteBg:'rgba(255,255,255,.07)', frenteFg:'#c3c6ac' };
+    // [data, descrição, centro, categoria, conta, valor]
+    const LANCAMENTOS = [
+      ['28/07','Reserva Júlia R. — Rifugio Fieline','hosp','Hospedagem — diárias','Nubank PJ',2600],
+      ['25/07','Venda 20 sacas — Cooperativa Pronova','cafe','Venda de café','Banestes · café',28400],
+      ['18/07','Reserva Renata S. — Casa Vecchia','hosp','Hospedagem — diárias','Nubank PJ',1050],
+      ['05/07','Sinal 50% — Fam. Sartori (ago)','hosp','Hospedagem — diárias','Sicoob · movimento',925],
+      ['02/07','Venda 30 sacas — Exportadora Tristão','cafe','Venda de café','Banestes · café',42600],
+      ['26/07','Diária caseiro + limpeza pós-estadia','hosp','Mão de obra','Sicoob · movimento',-380],
+      ['22/07','Adubo e corretivo de solo','cafe','Insumos','Banestes · café',-4120],
+      ['20/07','Parcela 14/48 — trator Valtra','geral','Financiamento','Sicoob · movimento',-2890],
+      ['15/07','Energia elétrica (sede + casas)','geral','Contas fixas','Sicoob · movimento',-742],
+      ['12/07','Colheita — turma de 6 diaristas','cafe','Mão de obra','Banestes · café',-3600],
+      ['08/07','Enxoval e amenities das casas','hosp','Manutenção','Nubank PJ',-1180],
+    ];
+    const ehReceita = st.finTab === 'rec';
+    const contaFiltro = st.contaFiltro || 'Todas as contas';
+    const bancos = st.contas.map(c => c.banco);
+    const opcoesContaFiltro = ['Todas as contas'].concat(bancos);
+    const casaConta = txt => contaFiltro === 'Todas as contas' || String(txt).toLowerCase().indexOf(contaFiltro.toLowerCase()) >= 0;
+    const movBrutos = LANCAMENTOS.filter(l => (l[5] > 0) === ehReceita && casaConta(l[4]));
+    const movimentos = movBrutos.map(([data, desc, f, cat, conta, v]) => ({ data, desc, cat, conta, ...frente(f), valor: (v>0?'+ ':'− ')+fmt(Math.abs(v)), color: v>0?'#a3c47d':'#a9553f' }));
+    const movSoma = movBrutos.reduce((a,l) => a+Math.abs(l[5]), 0);
+    const dividas = [
+      { nome:'Financiamento trator Valtra', tag:'Pronaf', detalhe:'48 parcelas · juros 4,5% a.a.', pctN:29, total:138700, pagoN:40450, proxima:'20/08 · '+fmt(2890), color:'#93a35f' },
+      { nome:'Reforma Casa Verona', tag:'Parcelado', detalhe:'Material + mão de obra · 10 parcelas', pctN:70, total:32000, pagoN:22400, proxima:'05/08 · '+fmt(3200), color:'#6f8f7a' },
+      { nome:'Insumos safra 26/27', tag:'Barter', detalhe:'Pagamento em sacas na colheita', pctN:0, total:18600, pagoN:0, proxima:'set/2026 · 14 sacas', color:'#7d9a4a' },
+      { nome:'Cartão BNDES — irrigação', tag:'BNDES', detalhe:'36 parcelas · juros 1,1% a.m.', pctN:58, total:24000, pagoN:13920, proxima:'12/08 · '+fmt(667), color:'#cbd0b0' },
+    ].concat((st.dividasNovas || []).map(d => ({
+      nome: d.nome, tag: d.titular.split(' ')[0], detalhe: d.parcelas + ' parcelas ' + d.period.replace(/al$/, 'ais').toLowerCase() + ' · juros ' + d.juros,
+      pctN: 0, total: d.total, pagoN: 0,
+      proxima: d.primeiro.slice(8,10)+'/'+d.primeiro.slice(5,7)+' · '+fmt(Math.round(d.total/d.parcelas)), color: '#cbd0b0',
+    }))).map(d => ({ ...d, pct: d.pctN+'%', pago: fmt(d.pagoN), resta: fmt(d.total-d.pagoN), tagBg:'rgba(255,255,255,.07)', tagFg:'#c3c6ac' }));
+    const SOCIOS = ['Lucas Hoffmann Tótola','Michel Hoffmann Tótola','Gilson Tótola','Rosimere Hoffmann'];
+    const aportesLista = st.aportes || [];
+    const lucroCota = Math.round(21470 / 4);
+    const socios = SOCIOS.map(nome => {
+      const ap = aportesLista.filter(a => a.socio===nome && a.tipo==='Aporte').reduce((s,a)=>s+a.valor,0);
+      const dev = aportesLista.filter(a => a.socio===nome && a.tipo==='Devolução').reduce((s,a)=>s+a.valor,0);
+      const saldo = ap - dev;
+      return { nome, cota:'25%', lucro: fmt(lucroCota), aportes: ap ? fmt(ap) : '—', devolucoes: dev ? fmt(dev) : '—',
+        saldo: saldo ? fmt(saldo) : '—', saldoColor: saldo ? '#b7c880' : '#6f7658' };
+    });
+    const extratoAportes = aportesLista.slice().reverse().map(a => ({
+      data: a.data, socio: a.socio, tipo: a.tipo, obs: a.obs || (a.tipo==='Aporte' ? 'Aporte de capital' : 'Devolução de capital aportado'),
+      valorFmt: (a.tipo==='Aporte' ? '+ ' : '− ') + fmt(a.valor), cor: a.tipo==='Aporte' ? '#a3c47d' : '#d2917c',
+    }));
+    const saldoAporteTotal = aportesLista.reduce((s,a) => s + (a.tipo==='Aporte' ? a.valor : -a.valor), 0);
+    const aporteTipo = st.aporteTipo || 'Aporte';
+    const aporteForm = st.aporteForm || {};
+    const salvarAporte = () => {
+      const socio = aporteForm.socio || SOCIOS[0];
+      const valor = parseInt(String(aporteForm.valor || '').replace(/\D/g,''), 10);
+      if (!valor) return this.setState({ aporteErro: 'Informe o valor do ' + (aporteTipo==='Aporte' ? 'aporte' : 'a devolução') + '.' });
+      if (aporteTipo === 'Devolução') {
+        const dispon = aportesLista.filter(a=>a.socio===socio).reduce((s,a)=>s+(a.tipo==='Aporte'?a.valor:-a.valor),0);
+        if (valor > dispon) return this.setState({ aporteErro: 'Valor maior que o aporte em aberto de ' + socio + ' (' + fmt(dispon) + ').' });
+      }
+      const hoje = new Date();
+      const data = String(hoje.getDate()).padStart(2,'0')+'/'+String(hoje.getMonth()+1).padStart(2,'0');
+      this.setState(s => ({ aportes: (s.aportes||[]).concat({ socio, tipo: aporteTipo, valor, data, obs: aporteForm.obs || '' }),
+        aporteForm: {}, aporteErro: '', modal: null }));
+    };
+    const etapas = st.safra.etapas.map(e => {
+      const s = e.fim < '2026-08-01' ? 'done' : (e.ini <= '2026-08-01' ? 'now' : 'next');
+      const ab = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      return { nome: e.nome, periodo: ab[+e.ini.slice(5,7)-1] + ' – ' + ab[+e.fim.slice(5,7)-1],
+        barra: s==='done'?'#46512a':s==='now'?'#7d9a4a':'rgba(255,255,255,.08)',
+        color: s==='now'?'#a3c47d':s==='done'?'#c3c6ac':'#8b9174', peso: s==='now'?'600':'400' };
+    });
+    const custosCafeDef = [['Mão de obra',18400],['Insumos',12300],['Combustível & máquinas',5200],['Beneficiamento',3100],['Outros',1650]];
+    const custosCafe = custosCafeDef.map(([label, v]) => ({ label, valor: fmt(v), pct: Math.round(v/18400*100)+'%' }));
+    const vendas = [
+      ['Cooperativa Pronova', 28400, '20 sacas · bebida dura · 25/07'],['Exportadora Tristão', 42600, '30 sacas · cereja descascado · 02/07'],['Torrefação local (Serra Café)', 8520, '6 sacas · microlote · 14/06'],
+    ].map(([comprador, v, detalhe]) => ({ comprador, valor: fmt(v), detalhe }));
+    // ─── Cadastros (tabelas primárias) ───────────────────────────────
+    const setForm = (k, v) => this.setState(s => ({ cadForm: { ...s.cadForm, [k]: v } }));
+    const mascaraCpf = v => { const d = String(v).replace(/\D/g,'').slice(0,11);
+      return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/^(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4'); };
+    const mascaraCnpj = v => { const d = String(v).replace(/\D/g,'').slice(0,14);
+      return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3/$4').replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/, '$1.$2.$3/$4-$5'); };
+    const mascaraDoc = v => String(v).replace(/\D/g,'').length > 11 ? mascaraCnpj(v) : mascaraCpf(v);
+    const campo = (k, label, ph, opcoes) => ({
+      label, ph: ph || '', isSelect: !!opcoes, isInput: !opcoes, opcoes: opcoes || [],
+      value: st.cadForm[k] ?? (opcoes ? opcoes[0] : ''),
+      onChange: e => setForm(k, k==='cpf' ? mascaraCpf(e.target.value) : k==='doc' ? mascaraDoc(e.target.value) : e.target.value),
+    });
+    const CAD = {
+      cat: {
+        label:'Categorias', titulo:'Nova categoria', botao:'Nova categoria', desc:'Aparece na lista de categorias ao lançar receitas e despesas.',
+        cols:['Categoria','Tipo'], lista:'cats',
+        campos:[campo('nome','Nome da categoria *','Ex.: Marketing e anúncios'), campo('tipo','Tipo *',null,['Despesa','Receita'])],
+        chaves:['nome','tipo'], obrig:['nome'],
+      },
+      centro: {
+        label:'Centro de custo/receita', titulo:'Novo centro', botao:'Novo centro', desc:'Substitui o antigo campo “Frente”. Usado nos relatórios por frente de operação.',
+        cols:['Centro','Tipo','Observação'], lista:'centros',
+        campos:[campo('nome','Nome do centro *','Ex.: Eventos e day-use'), campo('tipo','Tipo *',null,['Receita e despesa','Receita','Despesa']), campo('obs','Observação (opcional)','Ex.: rateio entre frentes')],
+        chaves:['nome','tipo','obs'], obrig:['nome'],
+      },
+      hosp: {
+        label:'Hóspedes', titulo:'Novo hóspede', botao:'Novo hóspede', desc:'Obrigatório ao criar uma reserva — só hóspedes cadastrados aqui aparecem na lista.',
+        cols:['Hóspede','CPF','Contato','E-mail','Origem'], lista:'hospedes',
+        campos:[campo('nome','Nome completo *','Ex.: Ana Beatriz Ferreira'), campo('cpf','CPF *','000.000.000-00'), campo('contato','Contato *','(27) 9…'), campo('email','E-mail (opcional)','nome@email.com'), campo('origem','Origem (opcional)',null,['Airbnb','WhatsApp','Instagram','Indicação'])],
+        chaves:['nome','cpf','contato','email','origem'], obrig:['nome','cpf','contato'],
+      },
+      clifor: {
+        label:'Clientes e fornecedores', titulo:'Novo cliente ou fornecedor', botao:'Novo cliente/fornecedor',
+        desc:'Entidades do café e da operação — compradores, cooperativas, prestadores e fornecedores de insumos. Aparecem nos pagamentos e recebimentos.',
+        cols:['Nome / razão social','Relação','CNPJ / CPF','Contato','Observação'], lista:'clifor',
+        campos:[campo('nome','Nome / razão social *','Ex.: Cooperativa Pronova'), campo('relacao','Relação *',null,['Cliente','Fornecedor','Cliente e fornecedor']), campo('doc','CNPJ / CPF *','00.000.000/0000-00'), campo('contato','Contato *','(27) 9…'), campo('obs','Observação (opcional)','Ex.: compra de café em coco')],
+        chaves:['nome','relacao','doc','contato','obs'], obrig:['nome','doc','contato'],
+      },
+      conta: {
+        label:'Contas bancárias', titulo:'Nova conta bancária', botao:'Nova conta bancária', desc:'Usada nos lançamentos e na importação do extrato OFX.',
+        cols:['Banco','Apelido','Tipo','Saldo atual'], lista:'contas',
+        campos:[campo('banco','Banco *','Ex.: Sicoob'), campo('apelido','Apelido da conta *','Ex.: Conta café'), campo('tipo','Tipo *',null,['Corrente','Poupança','Pagamento']), campo('saldo','Saldo atual (R$)','0,00')],
+        chaves:['banco','apelido','tipo','saldo'], obrig:['banco','apelido'],
+      },
+    };
+    const cadAtual = CAD[st.cadTab] || CAD.cat;
+    const cadTabs = Object.keys(CAD).map(id => ({
+      label: CAD[id].label, onClick: () => this.setState({ cadTab: id, cadForm: {}, cadErro: '' }),
+      style: `font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer;${st.cadTab===id?'background:rgba(147,163,95,.15);color:#b7c880;font-weight:500':'color:#8b9174'}`,
+    }));
+    const cadLista = (st[cadAtual.lista] || []).map((item, i) => ({
+      cells: cadAtual.chaves.map((k, j) => ({
+        texto: cadAtual.lista==='contas' && k==='saldo' ? 'R$ '+(item[k]||'—') : (item[k] || '—'),
+        color: j===0 ? '#edeade' : '#8b9174', peso: j===0 ? '500' : '400',
+      })),
+      remover: () => this.setState(s => ({ [cadAtual.lista]: s[cadAtual.lista].filter((_, x) => x !== i) })),
+    }));
+    const rotulo = { nome:'Nome', cpf:'CPF', contato:'Contato', banco:'Banco', apelido:'Apelido da conta', doc:'CNPJ / CPF', relacao:'Relação', tipo:'Tipo', obs:'Observação', email:'E-mail', origem:'Origem', saldo:'Saldo atual' };
+    const cadAdicionar = () => {
+      const novo = {};
+      cadAtual.chaves.forEach((k, i) => { novo[k] = (st.cadForm[k] ?? (cadAtual.campos[i].isSelect ? cadAtual.campos[i].opcoes[0] : '')).toString().trim(); });
+      const faltando = (cadAtual.obrig || []).filter(k => !novo[k]);
+      if (faltando.length) return this.setState({ cadErro: 'Preencha: ' + faltando.map(k => rotulo[k] || k).join(', ') + '.' });
+      if (cadAtual.lista === 'hospedes' && novo.cpf.replace(/\D/g,'').length !== 11) return this.setState({ cadErro: 'CPF inválido — informe os 11 dígitos.' });
+      this.setState(s => ({ [cadAtual.lista]: s[cadAtual.lista].concat(novo), cadForm: {}, cadErro: '', modal: null }));
+    };
+    const ordenaPrimeiro = (arr, alvo) => arr.slice().sort((a, b) => (a === alvo ? -1 : 0) - (b === alvo ? -1 : 0));
+    const opcoesCentroBase = st.centros.map(c => c.nome);
+    const opcoesCentro = st.lancCtx === 'cafe' ? ordenaPrimeiro(opcoesCentroBase, 'Café') : opcoesCentroBase;
+    const opcoesConta = st.contas.map(c => c.banco + ' · ' + c.apelido);
+    const tipoLanc = st.lancTipo === 'rec' ? 'Receita' : 'Despesa';
+    const opcoesCategoriaBase = st.cats.filter(c => c.tipo === tipoLanc).map(c => c.nome);
+    const opcoesCategoria = st.lancCtx === 'cafe' ? ordenaPrimeiro(opcoesCategoriaBase, 'Venda de café') : opcoesCategoriaBase;
+    // ─── Contrato de dívida ──────────────────────────────────────────
+    const divForm = st.divForm || {};
+    const PERIODICIDADE = ['Mensal','Bimestral','Trimestral','Semestral','Anual'];
+    const plural = p => p.replace(/al$/, 'ais').toLowerCase();
+    const setDiv = (k, v) => this.setState(s => ({ divForm: { ...s.divForm, [k]: v }, divErro: '' }));
+    const campoDiv = (k, label, ph, opcoes, tipo, span) => ({ label, ph: ph || '', tipo: tipo || 'text', span: span || 'span 1',
+      isSelect: !!opcoes, isInput: !opcoes, opcoes: opcoes || [],
+      value: divForm[k] ?? (opcoes ? opcoes[0] : ''), onChange: e => setDiv(k, e.target.value) });
+    const divCampos = [
+      campoDiv('nome', 'Descrição do contrato *', 'Ex.: Financiamento colheitadeira', null, 'text', 'span 2'),
+      campoDiv('credor', 'Credor / instituição *', 'Ex.: Banestes — Pronaf'),
+      campoDiv('titular', 'Titular da dívida *', null, SOCIOS),
+      campoDiv('total', 'Valor total do contrato *', 'R$ 138.700'),
+      campoDiv('parcelas', 'Número de parcelas *', '48', null, 'number'),
+      campoDiv('primeiro', 'Vencimento da 1ª parcela *', '', null, 'date'),
+      campoDiv('period', 'Periodicidade *', null, PERIODICIDADE),
+      campoDiv('juros', 'Taxa de juros', 'Ex.: 4,5% a.a.', null, 'text', 'span 2'),
+    ];
+    const divTotalNum = parseInt(String(divForm.total || '').replace(/\D/g,''), 10) || 0;
+    const divNparc = parseInt(String(divForm.parcelas || ''), 10) || 0;
+    const divPeriod = divForm.period || PERIODICIDADE[0];
+    const divPrevia = divTotalNum && divNparc
+      ? '◆ ' + divNparc + ' parcelas ' + plural(divPeriod) + ' de ' + fmt(Math.round(divTotalNum/divNparc)) + ' · primeira em ' + (divForm.primeiro ? divForm.primeiro.slice(8,10)+'/'+divForm.primeiro.slice(5,7)+'/'+divForm.primeiro.slice(0,4) : 'data a definir') + ' · titular ' + (divForm.titular || SOCIOS[0]).split(' ')[0]
+      : 'Informe o valor total e o número de parcelas para ver o provisionamento.';
+    const salvarDivida = () => {
+      const faltando = [];
+      if (!divForm.nome) faltando.push('descrição');
+      if (!divForm.credor) faltando.push('credor');
+      if (!divTotalNum) faltando.push('valor total');
+      if (!divNparc) faltando.push('número de parcelas');
+      if (!divForm.primeiro) faltando.push('vencimento da 1ª parcela');
+      if (faltando.length) return this.setState({ divErro: 'Preencha: ' + faltando.join(', ') + '.' });
+      const nova = { nome: divForm.nome, credor: divForm.credor, titular: divForm.titular || SOCIOS[0],
+        total: divTotalNum, parcelas: divNparc, period: divPeriod, juros: divForm.juros || '—', primeiro: divForm.primeiro };
+      this.setState(s => ({ dividasNovas: (s.dividasNovas || []).concat(nova), divForm: {}, divErro: '', modal: null, finTab: 'div' }));
+    };
+    // ─── Safra (configuração) ────────────────────────────────────────
+    const sf = st.safra;
+    const setSafra = (k, v) => this.setState(s => ({ safra: { ...s.safra, [k]: v }, safraSalvo: false }));
+    const MES_AB = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const HOJE_ISO = '2026-08-01';
+    const campoSafra = (k, label, ph, tipo, span) => ({ label, ph: ph || '', tipo: tipo || 'text', span: span || 'span 1',
+      value: sf[k] || '', onChange: e => setSafra(k, e.target.value) });
+    const safraCamposCiclo = [
+      campoSafra('ano', 'Ano-safra *', 'Ex.: 2026/27'),
+      campoSafra('talhoes', 'Nº de talhões', '6'),
+      campoSafra('inicio', 'Início do ciclo', '', 'date'),
+      campoSafra('fim', 'Fim do ciclo', '', 'date'),
+      campoSafra('area', 'Área em produção (ha)', '18'),
+      campoSafra('variedades', 'Variedades', 'Ex.: Catuaí Vermelho 144', 'text', 'span 2'),
+    ];
+    const safraCamposExpect = [
+      campoSafra('sacasPrev', 'Sacas previstas (60kg)', '165'),
+      campoSafra('precoSaca', 'Preço esperado por saca (R$)', '1.420'),
+      campoSafra('custoPrev', 'Custo previsto da safra (R$)', '52.000', 'text', 'span 2'),
+    ];
+    const numSf = k => parseFloat(String(sf[k] || '').replace(/\./g,'').replace(',','.')) || 0;
+    const sacasPrev = numSf('sacasPrev'), precoSaca = numSf('precoSaca'), custoPrev = numSf('custoPrev'), areaSf = numSf('area');
+    const receitaPrev = Math.round(sacasPrev * precoSaca);
+    const safraProjecao = [
+      { label: 'Receita estimada', valor: fmt(receitaPrev), cor: '#a3c47d' },
+      { label: 'Margem estimada', valor: fmt(receitaPrev - custoPrev), cor: receitaPrev - custoPrev >= 0 ? '#b7c880' : '#d2917c' },
+      { label: 'Produtividade', valor: areaSf ? (sacasPrev/areaSf).toFixed(1).replace('.',',') + ' sc/ha' : '—', cor: '#edeade' },
+    ];
+    const statusEtapa = e => e.fim < HOJE_ISO ? 'done' : (e.ini <= HOJE_ISO ? 'now' : 'next');
+    const rotuloEtapa = e => MES_AB[+e.ini.slice(5,7)-1] + ' – ' + MES_AB[+e.fim.slice(5,7)-1];
+    const setEtapa = (i, k, v) => this.setState(s => {
+      const et = s.safra.etapas.map(x => ({ ...x })); et[i][k] = v;
+      return { safra: { ...s.safra, etapas: et }, safraSalvo: false };
+    });
+    const safraEtapas = sf.etapas.map((e, i) => {
+      const s = statusEtapa(e);
+      return { nome: e.nome, ini: e.ini, fim: e.fim,
+        iniOnChange: ev => setEtapa(i, 'ini', ev.target.value), fimOnChange: ev => setEtapa(i, 'fim', ev.target.value),
+        status: s==='done' ? 'Concluída' : s==='now' ? 'Em andamento' : 'Prevista',
+        statusStyle: s==='done' ? 'font-size:11.5px;padding:4px 11px;border-radius:99px;background:rgba(255,255,255,.06);color:#c3c6ac;white-space:nowrap'
+          : s==='now' ? 'font-size:11.5px;padding:4px 11px;border-radius:99px;background:rgba(125,154,74,.2);color:#a3c47d;white-space:nowrap'
+          : 'font-size:11.5px;padding:4px 11px;border-radius:99px;background:rgba(147,163,95,.1);color:#8b9174;white-space:nowrap' };
+    });
+    // ─── Transferências entre contas ─────────────────────────────────
+    const transfForm = st.transfForm || {};
+    const contasLabels = st.contas.map(c => c.banco + ' · ' + c.apelido);
+    const transfOrigem = transfForm.origem || contasLabels[0] || '';
+    const transfDestino = transfForm.destino || contasLabels[1] || contasLabels[0] || '';
+    const transfValorNum = parseInt(String(transfForm.valor || '').replace(/\D/g,''), 10) || 0;
+    const setTransf = (k, v) => this.setState(s => ({ transfForm: { ...s.transfForm, [k]: v }, transfErro: '' }));
+    const salvarTransf = () => {
+      if (!transfValorNum) return this.setState({ transfErro: 'Informe o valor da transferência.' });
+      if (transfOrigem === transfDestino) return this.setState({ transfErro: 'A conta de destino precisa ser diferente da conta de origem.' });
+      const hoje = new Date();
+      const data = String(hoje.getDate()).padStart(2,'0')+'/'+String(hoje.getMonth()+1).padStart(2,'0');
+      this.setState(s => ({ transferencias: [{ data, origem: transfOrigem, destino: transfDestino, valor: transfValorNum, obs: (s.transfForm||{}).obs || 'Transferência entre contas' }].concat(s.transferencias),
+        transfForm: {}, transfErro: '', modal: null, finTab: 'transf' }));
+    };
+    const transfFiltradas = st.transferencias.filter(t => casaConta(t.origem + ' ' + t.destino));
+    const transferencias = transfFiltradas.map(t => ({
+      data: t.data, origem: t.origem, destino: t.destino, valor: fmt(t.valor),
+      saida: '− ' + fmt(t.valor) + ' · ' + t.obs, entrada: '+ ' + fmt(t.valor),
+    }));
+    // ─── Notas fiscais ───────────────────────────────────────────────
+    const HOJE = '2026-08-01';
+    const pillNf = (bg, fg) => `font-size:11.5px;padding:4px 11px;border-radius:99px;background:${bg};color:${fg};white-space:nowrap`;
+    const dbr = iso => iso.slice(8,10)+'/'+iso.slice(5,7);
+    const addDias = (iso, d) => { const t = new Date(iso+'T12:00:00'); t.setDate(t.getDate()+d); return t.toISOString().slice(0,10); };
+    const statusNota = n => {
+      const abertas = n.parcelas.filter(p => !p.pago);
+      if (!abertas.length) return 'paga';
+      return abertas.some(p => p.venc < HOJE) ? 'vencida' : 'aberto';
+    };
+    const nfTab = st.nfTab || 'todas';
+    const nfDestF = st.nfDestFiltro || 'todos';
+    const DEST = ['Lucas Hoffmann Tótola', 'Michel Hoffmann Tótola'];
+    const nfTabDef = [['aberto','Em aberto'],['vencida','Vencidas'],['paga','Pagas'],['todas','Todas']];
+    const nfTabs = nfTabDef.map(([id, label]) => ({ label,
+      onClick: () => this.setState({ nfTab: id }),
+      style: `font-size:13px;padding:8px 16px;border-radius:7px;cursor:pointer;${nfTab===id?'background:rgba(147,163,95,.15);color:#b7c880;font-weight:500':'color:#8b9174'}`,
+    }));
+    const nfFiltrosDest = [['todos','Todos']].concat(DEST.map(d => [d, d.split(' ')[0]])).map(([id, label]) => ({ label,
+      onClick: () => this.setState({ nfDestFiltro: id }),
+      style: `font-size:12.5px;padding:7px 14px;border-radius:99px;cursor:pointer;border:1px solid ${nfDestF===id?'#93a35f':'rgba(255,255,255,.12)'};${nfDestF===id?'background:rgba(147,163,95,.16);color:#edeade':'color:#8b9174'}`,
+    }));
+    const destChip = d => `font-size:11.5px;padding:4px 10px;border-radius:99px;white-space:nowrap;justify-self:start;background:${d===DEST[0]?'rgba(147,163,95,.16);color:#b7c880':'rgba(203,208,176,.14);color:#dfe3cb'}`;
+    const notasFiltradas = st.notas.filter(n => (nfTab==='todas' || statusNota(n)===nfTab) && (nfDestF==='todos' || n.dest===nfDestF));
+    const nfLista = notasFiltradas.map(n => {
+      const s = statusNota(n), pagas = n.parcelas.filter(p => p.pago).length;
+      const prox = n.parcelas.filter(p => !p.pago).sort((a,b) => a.venc < b.venc ? -1 : 1)[0];
+      return {
+        num: n.num, emitente: n.emitente, dest: n.dest.split(' ')[0], destStyle: destChip(n.dest),
+        emissao: dbr(n.emissao), valor: fmt(n.parcelas.reduce((t,p)=>t+p.valor,0)),
+        parcelasResumo: pagas + ' de ' + n.parcelas.length + (n.parcelas.length>1 ? ' parcelas pagas' : ' parcela paga'),
+        proxima: prox ? 'próx. ' + dbr(prox.venc) + ' · ' + fmt(prox.valor) : 'quitada',
+        status: s==='paga' ? 'Paga' : s==='vencida' ? 'Vencida' : 'Em aberto',
+        statusStyle: s==='paga' ? pillNf('rgba(125,154,74,.2)','#a3c47d') : s==='vencida' ? pillNf('rgba(194,112,90,.18)','#d2917c') : pillNf('rgba(147,163,95,.12)','#b7c880'),
+        arquivo: n.arquivo,
+      };
+    });
+    const somaNotas = ns => ns.reduce((t,n) => t + n.parcelas.reduce((x,p)=>x+p.valor,0), 0);
+    const parcelasAbertas = st.notas.reduce((acc,n) => acc.concat(n.parcelas.filter(p=>!p.pago).map(p=>({...p, dest:n.dest}))), []);
+    const vencidoTotal = parcelasAbertas.filter(p => p.venc < HOJE).reduce((t,p)=>t+p.valor,0);
+    const limite7 = addDias(HOJE, 7);
+    const aVencer7 = parcelasAbertas.filter(p => p.venc >= HOJE && p.venc <= limite7);
+    const nfKpis = DEST.map(d => {
+      const ns = st.notas.filter(n => n.dest===d);
+      const aberto = parcelasAbertas.filter(p => p.dest===d).reduce((t,p)=>t+p.valor,0);
+      return { label: 'Acumulado ' + d.split(' ')[0], value: fmt(somaNotas(ns)), color:'#edeade',
+        detalhe: ns.length + ' notas · ' + fmt(aberto) + ' em aberto' };
+    }).concat([
+      { label:'Vence em 7 dias', value: fmt(aVencer7.reduce((t,p)=>t+p.valor,0)), color:'#b7c880', detalhe: aVencer7.length + ' parcelas até ' + dbr(limite7) },
+      { label:'Vencidas', value: fmt(vencidoTotal), color: vencidoTotal ? '#d2917c' : '#a3c47d', detalhe: parcelasAbertas.filter(p=>p.venc<HOJE).length + ' parcelas em atraso' },
+    ]);
+    const nfPorDestino = DEST.map(d => {
+      const aberto = parcelasAbertas.filter(p => p.dest===d).reduce((t,p)=>t+p.valor,0);
+      const ns = st.notas.filter(n => n.dest===d);
+      return { nome: d, detalhe: ns.length + ' notas fiscais em 2026', total: fmt(somaNotas(ns)),
+        aberto: aberto ? fmt(aberto) + ' em aberto' : 'tudo quitado', abertoCor: aberto ? '#d2917c' : '#a3c47d' };
+    });
+    // formulário de nota fiscal
+    const nfForm = st.nfForm || {};
+    const nfTotalNum = parseInt(String(nfForm.valor || '').replace(/\D/g,''), 10) || 0;
+    const nfEmissao = nfForm.emissao || HOJE;
+    const nfParcOv = st.nfParc || [{}];
+    const nP = nfParcOv.length;
+    const baseParc = nP ? Math.floor(nfTotalNum / nP) : 0;
+    const setParc = (i, k, v) => this.setState(s => { const arr = (s.nfParc || [{}]).map(x => ({...x})); arr[i][k] = v; return { nfParc: arr, nfErro: '' }; });
+    const nfParcelas = nfParcOv.map((p, i) => {
+      const padrao = i === nP-1 ? nfTotalNum - baseParc*(nP-1) : baseParc;
+      const num = p.valor !== undefined ? (parseInt(String(p.valor).replace(/\D/g,''), 10) || 0) : padrao;
+      return {
+        rotulo: (i+1)+'/'+nP, _num: num,
+        venc: p.venc || addDias(nfEmissao, 30*i),
+        valor: p.valor !== undefined ? p.valor : (nfTotalNum ? 'R$ ' + padrao.toLocaleString('pt-BR') : ''),
+        vencOnChange: e => setParc(i, 'venc', e.target.value),
+        valorOnChange: e => setParc(i, 'valor', e.target.value),
+        remover: nP > 1 ? () => this.setState(s => ({ nfParc: (s.nfParc||[{}]).filter((_, x) => x !== i), nfErro: '' })) : null,
+        removerStyle: nP > 1 ? 'text-align:center;color:#6f7658;cursor:pointer;font-size:12px' : 'text-align:center;color:#2c3520;font-size:12px',
+      };
+    });
+    const somaParc = nfParcelas.reduce((t,p) => t + p._num, 0);
+    const difParc = nfTotalNum - somaParc;
+    const nfArquivo = nfForm.arquivo || '';
+    const salvarNf = () => {
+      const faltando = [];
+      if (!nfForm.num) faltando.push('número da nota');
+      if (!nfForm.emitente) faltando.push('emitente');
+      if (!nfTotalNum) faltando.push('valor total');
+      if (faltando.length) return this.setState({ nfErro: 'Preencha: ' + faltando.join(', ') + '.' });
+      if (difParc !== 0) return this.setState({ nfErro: 'As parcelas somam ' + fmt(somaParc) + ' e o total da nota é ' + fmt(nfTotalNum) + '. Ajuste antes de salvar.' });
+      if (!nfArquivo) return this.setState({ nfErro: 'Anexe o arquivo da nota fiscal — o anexo é obrigatório.' });
+      const nova = { num: nfForm.num, emitente: nfForm.emitente, dest: nfForm.dest || DEST[0], emissao: nfEmissao,
+        arquivo: nfArquivo, parcelas: nfParcelas.map(p => ({ venc: p.venc, valor: p._num, pago: false })) };
+      this.setState(s => ({ notas: s.notas.concat(nova), nfForm: {}, nfParc: [{}], nfErro: '', modal: null, nfTab: 'todas' }));
+    };
+    const setNf = (k, v) => this.setState(s => ({ nfForm: { ...s.nfForm, [k]: v }, nfErro: '' }));
+    const clientesCafe = st.clifor.filter(c => c.relacao !== 'Fornecedor').map(c => 'Cliente — ' + c.nome);
+    const opcoesVinculo = st.lancCtx === 'cafe'
+      ? clientesCafe.concat(['Sem vínculo'])
+      : st.lancTipo === 'rec'
+      ? st.hospedes.map(h => 'Hóspede — ' + h.nome).concat(clientesCafe, ['Sem vínculo'])
+      : st.clifor.filter(c => c.relacao !== 'Cliente').map(c => 'Fornecedor — ' + c.nome).concat(['Safra 26/27', 'Dívida — trator Valtra', 'Dívida — reforma Casa Verona', 'Sem vínculo']);
+    // ─── Conciliação bancária (OFX) ──────────────────────────────────
+    const OFX = [
+      ['l1','28/07','PIX RECEBIDO JULIA R SANTOS','DOC 884120',2600,'Reserva Júlia R. — Rifugio Fieline','Receita · Hospedagem — diárias · 28/07'],
+      ['l2','26/07','PIX ENVIADO J APARECIDO DA COSTA','DOC 884007',-380,'Diária caseiro + limpeza pós-estadia','Despesa · Mão de obra · 26/07'],
+      ['l3','22/07','DEB CARTAO AGROPECUARIA SERRANA','AUT 553091',-4120,'Adubo e corretivo de solo','Despesa · Insumos · 22/07'],
+      ['l4','20/07','DEB AUTOMATICO FIN VALTRA 14/48','AUT 118845',-2890,'Parcela 14/48 — trator Valtra','Despesa · Financiamento · 20/07'],
+      ['l5','15/07','DEB EDP ESPIRITO SANTO','AUT 771230',-742,'Energia elétrica (sede + casas)','Despesa · Contas fixas · 15/07'],
+      ['l6','14/07','TARIFA PACOTE DE SERVICOS','TAR 000914',-49,null,'Nenhum lançamento com esse valor no período'],
+      ['l7','12/07','PIX ENVIADO M R DA SILVA','DOC 883410',-3600,'Colheita — turma de 6 diaristas','Despesa · Mão de obra · 12/07'],
+      ['l8','05/07','PIX RECEBIDO A B FERREIRA','DOC 882277',925,'Sinal 50% — Fam. Sartori (ago)','Receita · Hospedagem — diárias · 05/07'],
+      ['l9','03/07','COMPRA CARTAO POSTO SANTA TERESA','CAR 449012',-410,null,'Nenhum lançamento com esse valor no período'],
+    ];
+    const pill = (bg, fg) => `font-size:11.5px;padding:4px 11px;border-radius:99px;background:${bg};color:${fg};white-space:nowrap`;
+    const btnBase = 'font-size:12px;padding:5px 11px;border-radius:8px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;cursor:pointer;white-space:nowrap';
+    const concilLinhas = OFX.map(([id, data, desc, doc, v, sug, sugMeta]) => {
+      const ok = !!st.concil[id];
+      return {
+        data, desc, doc, valor: (v>0?'+ ':'− ')+fmt(Math.abs(v)), valorColor: v>0?'#a3c47d':'#a9553f',
+        sug: sug || 'Sem correspondência', sugMeta, sugColor: sug ? '#edeade' : '#8b9174',
+        barra: ok ? '#7d9a4a' : sug ? 'rgba(147,163,95,.45)' : '#c2705a',
+        status: ok ? 'Conciliado' : sug ? 'Sugestão' : 'Sem par',
+        statusStyle: ok ? pill('rgba(125,154,74,.2)','#a3c47d') : sug ? pill('rgba(147,163,95,.12)','#b7c880') : pill('rgba(194,112,90,.18)','#d2917c'),
+        btn: ok ? 'Desfazer' : sug ? 'Conciliar' : 'Criar lançamento',
+        btnStyle: ok ? btnBase+';opacity:.7' : sug ? btnBase+';border-color:rgba(147,163,95,.45);color:#b7c880' : btnBase,
+        acao: ok
+          ? (st.prestacaoGerada
+              ? () => this.setState({ modal: 'senha', senhaAlvo: id, senhaValor: '', senhaErro: false })
+              : () => this.setState(s => { const c = { ...s.concil }; delete c[id]; return { concil: c }; }))
+          : sug
+            ? () => this.setState(s => ({ concil: { ...s.concil, [id]: true } }))
+            : () => this.setState({ modal: 'lanc', lancTipo: v>0 ? 'rec' : 'desp', lancOrigem: id }),
+      };
+    });
+    const nConc = OFX.filter(l => st.concil[l[0]]).length;
+    const nSug = OFX.filter(l => l[5] && !st.concil[l[0]]).length;
+    const nSem = OFX.filter(l => !l[5] && !st.concil[l[0]]).length;
+    const pendente = OFX.filter(l => !st.concil[l[0]]).reduce((a,l) => a+Math.abs(l[4]), 0);
+    const mesConciliado = st.ofx && OFX.every(l => st.concil[l[0]]);
+    const descConciliadas = OFX.filter(l => st.concil[l[0]] && l[5]).map(l => l[5]);
+    const movimentosFinal = movimentos.map(m => {
+      const travado = descConciliadas.indexOf(m.desc) >= 0;
+      return { ...m, trava: travado ? '🔒 Conciliado' : 'Editar',
+        travaTitulo: travado ? 'Lançamento conciliado — edição bloqueada' : 'Lançamento aberto para edição',
+        travaStyle: travado
+          ? 'font-size:11px;padding:4px 9px;border-radius:99px;background:rgba(125,154,74,.16);color:#a3c47d;white-space:nowrap'
+          : 'font-size:11px;padding:4px 11px;border-radius:99px;border:1px solid rgba(255,255,255,.14);color:#c3c6ac;cursor:pointer;white-space:nowrap' };
+    });
+    const prest = st.prestacaoGerada
+      ? { icone:'✓', cor:'#a3c47d', bg:'rgba(125,154,74,.1)', borda:'rgba(125,154,74,.3)',
+          titulo:'Prestação de contas gerada e período fechado',
+          desc:'Gerada em 31/07/2026 · lançamentos bloqueados. Desfazer qualquer conciliação exige senha de administrador.',
+          btn:'Reabrir período', btnEstilo:'senha', acao: () => this.setState({ modal:'senha', senhaAlvo:'periodo', senhaValor:'', senhaErro:false }) }
+      : mesConciliado
+      ? { icone:'●', cor:'#b7c880', bg:'rgba(147,163,95,.1)', borda:'rgba(147,163,95,.28)',
+          titulo:'Julho 100% conciliado — pronto para fechar',
+          desc:'Todas as '+OFX.length+' linhas do extrato foram conciliadas. Ao gerar, o período é travado.',
+          btn:'Gerar prestação de contas', btnEstilo:'ok', acao: () => this.setState({ prestacaoGerada:true }) }
+      : { icone:'⚠', cor:'#d2917c', bg:'rgba(194,112,90,.1)', borda:'rgba(194,112,90,.28)',
+          titulo:'Conciliação de julho incompleta — geração bloqueada',
+          desc: (st.ofx ? (OFX.length-nConc)+' de '+OFX.length+' linhas do extrato ainda não conciliadas.' : 'Extrato OFX de julho ainda não importado.')+' A prestação só pode ser gerada com o mês 100% conciliado.',
+          btn:'Ir para conciliação', btnEstilo:'neutro', acao: () => this.setState({ screen:'concil' }) };
+    const prestBtnStyles = {
+      ok: 'font-size:12.5px;padding:8px 15px;border-radius:8px;background:#93a35f;color:#161c0d;font-weight:600;cursor:pointer;white-space:nowrap',
+      senha: 'font-size:12.5px;padding:8px 15px;border-radius:8px;border:1px solid rgba(194,112,90,.45);color:#d2917c;cursor:pointer;white-space:nowrap',
+      neutro: 'font-size:12.5px;padding:8px 15px;border-radius:8px;border:1px solid rgba(255,255,255,.16);color:#c3c6ac;cursor:pointer;white-space:nowrap',
+    };
+    const confirmarSenha = () => {
+      if ((st.senhaValor || '').length < 4) return this.setState({ senhaErro: true });
+      if (st.senhaAlvo === 'periodo') return this.setState({ prestacaoGerada: false, modal: null, senhaValor: '' });
+      this.setState(s => { const c = { ...s.concil }; delete c[s.senhaAlvo]; return { concil: c, modal: null, senhaValor: '' }; });
+    };
+    const ACC_LISTA = Object.keys(ACC);
+    const novaAcc = st.novaAcc || ['rifugio'];
+    const accChips = ACC_LISTA.map(k => {
+      const on = novaAcc.indexOf(k) >= 0;
+      return { nome: ACC[k].nome, cor: ACC[k].color,
+        style: `display:flex;align-items:center;gap:8px;font-size:13px;padding:9px 14px;border-radius:99px;cursor:pointer;border:1px solid ${on?'#93a35f':'rgba(255,255,255,.14)'};${on?'background:rgba(147,163,95,.16);color:#edeade':'color:#8b9174'}`,
+        onClick: () => this.setState(s => { const at = s.novaAcc || ['rifugio']; const nx = at.indexOf(k)>=0 ? at.filter(x=>x!==k) : at.concat(k); return { novaAcc: nx.length ? nx : at }; }) };
+    });
+    return {
+      isDash: st.screen==='dash', isCal: st.screen==='cal', isLista: st.screen==='lista', isRes: st.screen==='res', isFin: st.screen==='fin', isCafe: st.screen==='cafe',
+      isCad: st.screen==='cad', isConcil: st.screen==='concil', isNf: st.screen==='nf', isSafra: st.screen==='safra',
+      safraCamposCiclo, safraCamposExpect, safraProjecao, safraEtapas, safraAno: sf.ano,
+      safraSalvo: !!st.safraSalvo, safraSalvar: () => this.setState({ safraSalvo: true }),
+      safraNova: () => this.setState(s => ({ safra: { ...s.safra, ano: '', inicio: '', fim: '', sacasPrev: '', precoSaca: '', custoPrev: '' }, safraSalvo: false })),
+      navNf: go('nf'), nfKpis, nfTabs, nfFiltrosDest, nfLista, nfPorDestino,
+      nfRodape: nfLista.length + ' nota(s) no filtro atual',
+      nfTotalFiltro: fmt(somaNotas(notasFiltradas)),
+      abrirNf: () => this.setState({ modal:'nf', nfForm:{}, nfParc:[{}], nfErro:'' }),
+      modalIsNf: st.modal==='nf', salvarNf, nfParcelas,
+      nfQtdParcelas: nP === 1 ? 'à vista (1 parcela)' : nP + ' parcelas',
+      nfDestinatarios: DEST, nfDest: nfForm.dest || DEST[0], nfDestOnChange: e => setNf('dest', e.target.value),
+      nfFornecedores: st.clifor.filter(c => c.relacao !== 'Cliente').map(c => c.nome),
+      nfEmitente: nfForm.emitente || '', nfEmitenteOnChange: e => setNf('emitente', e.target.value),
+      nfEmitenteBorda: (st.nfErro && !nfForm.emitente) ? 'rgba(194,112,90,.6)' : 'rgba(255,255,255,.14)',
+      nfNum: nfForm.num || '', nfNumOnChange: e => setNf('num', e.target.value),
+      nfEmissao, nfEmissaoOnChange: e => setNf('emissao', e.target.value),
+      nfValor: nfForm.valor || '', nfValorOnChange: e => this.setState(s => ({ nfForm: { ...s.nfForm, valor: e.target.value }, nfParc: (s.nfParc||[{}]).map(() => ({})), nfErro: '' })),
+      nfCategorias: st.cats.filter(c => c.tipo === 'Despesa').map(c => c.nome),
+      nfAddParcela: () => this.setState(s => ({ nfParc: (s.nfParc||[{}]).concat({}).map(p => ({ venc: p.venc })), nfErro: '' })),
+      nfSomaAviso: !nfTotalNum ? 'Informe o valor total para dividir as parcelas.'
+        : difParc === 0 ? '✓ Parcelas somam ' + fmt(somaParc) + ' — igual ao total da nota.'
+        : (difParc > 0 ? 'Faltam ' + fmt(difParc) + ' para fechar o total da nota.' : 'Excedeu ' + fmt(-difParc) + ' em relação ao total da nota.'),
+      nfSomaCor: !nfTotalNum ? '#6f7658' : difParc === 0 ? '#a3c47d' : '#d2917c',
+      nfAnexar: () => this.setState(s => ({ nfForm: { ...s.nfForm, arquivo: 'NF-' + (s.nfForm && s.nfForm.num ? s.nfForm.num : 'sem-numero') + '-' + ((s.nfForm && s.nfForm.emitente ? s.nfForm.emitente : 'emitente').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')) + '.pdf' }, nfErro: '' })),
+      nfAnexoTexto: nfArquivo ? '✓ ' + nfArquivo : 'Anexar arquivo da nota fiscal (obrigatório)',
+      nfAnexoMeta: nfArquivo
+        ? 'Será salvo em Drive / Villa Serenità / notas fiscais / 2026 / ' + (nfForm.dest || DEST[0]).split(' ')[0]
+        : 'PDF ou XML · até 10 MB · vai para a pasta do destinatário no Drive',
+      nfAnexoCor: nfArquivo ? '#a3c47d' : '#c3c6ac',
+      nfAnexoBorda: nfArquivo ? 'rgba(125,154,74,.5)' : 'rgba(194,112,90,.45)',
+      nfAnexoBg: nfArquivo ? 'rgba(125,154,74,.08)' : 'rgba(194,112,90,.06)',
+      nfSalvarBg: nfArquivo && nfTotalNum && difParc===0 ? '#93a35f' : 'rgba(147,163,95,.55)',
+      nfErro: st.nfErro || '', nfTemErro: !!st.nfErro,
+      cadTabs, cadCols: cadAtual.cols, cadLista, cadCampos: cadAtual.campos, cadAdicionar,
+      cadFormTitulo: cadAtual.titulo, cadFormDesc: cadAtual.desc, cadBotao: cadAtual.botao || 'Novo cadastro',
+      abrirCad: () => this.setState({ modal: 'cad', cadForm: {}, cadErro: '' }),
+      modalIsCad: st.modal==='cad',
+      nomesSocios: SOCIOS, socios, extratoAportes,
+      aporteSaldoTotal: fmt(saldoAporteTotal),
+      aporteResumo: aportesLista.length + ' movimentações · total aportado em aberto',
+      abrirAporte: () => this.setState({ modal:'aporte', aporteTipo:'Aporte', aporteForm:{}, aporteErro:'' }),
+      abrirDevolucao: () => this.setState({ modal:'aporte', aporteTipo:'Devolução', aporteForm:{}, aporteErro:'' }),
+      modalIsAporte: st.modal==='aporte', salvarAporte,
+      aporteTitulo: aporteTipo==='Aporte' ? 'Informar aporte de capital' : 'Informar devolução de aporte',
+      aporteBtn: aporteTipo==='Aporte' ? 'Registrar aporte' : 'Registrar devolução',
+      aporteDesc: aporteTipo==='Aporte'
+        ? 'Entrada de dinheiro de um sócio além da cota. Fica como crédito dele, fora do rateio de lucro.'
+        : 'Saída de caixa para devolver capital que o sócio aportou. Abate o crédito dele, sem afetar o lucro dos demais.',
+      aporteNota: aporteTipo==='Aporte'
+        ? 'O valor entra no caixa e vira crédito do sócio — não é receita e não altera o rateio de 25%.'
+        : 'A devolução sai do caixa antes da distribuição de lucro — não é despesa da operação.',
+      aporteObsPh: aporteTipo==='Aporte' ? 'Ex.: capital de giro da safra' : 'Ex.: devolução parcial após venda',
+      aporteSocio: aporteForm.socio || SOCIOS[0],
+      aporteSocioOnChange: e => { const v = e.target.value; this.setState(s => ({ aporteForm: { ...s.aporteForm, socio: v }, aporteErro: '' })); },
+      aporteValor: aporteForm.valor || '',
+      aporteValorOnChange: e => { const v = e.target.value; this.setState(s => ({ aporteForm: { ...s.aporteForm, valor: v }, aporteErro: '' })); },
+      aporteObs: aporteForm.obs || '',
+      aporteObsOnChange: e => { const v = e.target.value; this.setState(s => ({ aporteForm: { ...s.aporteForm, obs: v } })); },
+      aporteErro: st.aporteErro || '', aporteTemErro: !!st.aporteErro,
+      cadRodape: cadLista.length + ' registro(s) · disponíveis em todos os lançamentos',
+      cadErro: st.cadErro || '', cadTemErro: !!st.cadErro,
+      opcoesCentro, opcoesConta, opcoesCategoria, opcoesVinculo,
+      opcoesHospede: st.hospedes.map(h => h.nome),
+      accChips,
+      resHospede: st.resHospede || '',
+      resHospedeOnChange: e => { const v = e.target.value; this.setState({ resHospede: v, resErro: false }); },
+      resHospedeBorda: st.resErro ? 'rgba(194,112,90,.6)' : 'rgba(255,255,255,.14)',
+      resSemHospede: !!st.resErro,
+      resSalvarBg: st.resHospede ? '#93a35f' : 'rgba(147,163,95,.55)',
+      salvarReserva: () => this.setState(s => s.resHospede ? { modal: null, resErro: false } : { resErro: true }),
+      pacoteAviso: novaAcc.length > 1 ? '◆ Pacote com '+novaAcc.length+' acomodações — valor total lançado como uma única reserva.' : 'Reserva de uma acomodação.',
+      pacoteCor: novaAcc.length > 1 ? '#b7c880' : '#6f7658',
+      prestIcone: prest.icone, prestCor: prest.cor, prestBg: prest.bg, prestBorda: prest.borda,
+      prestTitulo: prest.titulo, prestDesc: prest.desc, prestBtn: prest.btn, prestAcao: prest.acao,
+      prestBtnStyle: prestBtnStyles[prest.btnEstilo],
+      prestOpacidade: st.prestacaoGerada ? '1' : '.45',
+      pdfBg: st.prestacaoGerada ? '#93a35f' : 'rgba(255,255,255,.07)',
+      pdfFg: st.prestacaoGerada ? '#161c0d' : '#6f7658',
+      pdfCursor: st.prestacaoGerada ? 'pointer' : 'not-allowed',
+      modalIsSenha: st.modal==='senha', confirmarSenha,
+      senhaValor: st.senhaValor || '', senhaErro: !!st.senhaErro,
+      senhaOnChange: e => this.setState({ senhaValor: e.target.value, senhaErro: false }),
+      salvarLanc: () => this.setState(s => s.lancOrigem ? { concil: { ...s.concil, [s.lancOrigem]: true }, modal: null, lancOrigem: null } : { modal: null }),
+      lancTitulo: st.lancCtx==='cafe' ? 'Registrar venda de café' : st.lancTipo==='rec' ? 'Nova receita' : 'Nova despesa',
+      lancCor: st.lancTipo==='rec' ? '#a3c47d' : '#c2705a',
+      lancPlaceholder: st.lancCtx==='cafe' ? 'Ex.: 20 sacas · bebida dura' : st.lancTipo==='rec' ? 'Ex.: diárias reserva Fam. Sartori' : 'Ex.: turma de colheita — 6 diaristas',
+      lancValorPh: st.lancTipo==='rec' ? 'R$ 2.600' : 'R$ 3.600',
+      lancVinculoLabel: st.lancCtx==='cafe' ? 'Cliente da venda' : st.lancTipo==='rec' ? 'Vincular a hóspede ou cliente' : 'Vincular a',
+      semOfx: !st.ofx, temOfx: st.ofx, concilLinhas, concilQtd: OFX.length,
+      concilConta: st.contas[0] ? st.contas[0].banco + ' · ' + st.contas[0].apelido : '—',
+      importarOfx: () => this.setState({ ofx: true }),
+      conciliarTodos: () => this.setState(s => { const c = { ...s.concil }; OFX.forEach(l => { if (l[5]) c[l[0]] = true; }); return { concil: c }; }),
+      concilKpis: [
+        { label:'Conciliados', value: nConc+' / '+OFX.length, color:'#a3c47d' },
+        { label:'Sugestões pendentes', value: String(nSug), color:'#b7c880' },
+        { label:'Sem correspondência', value: String(nSem), color:'#d2917c' },
+        { label:'Valor não conciliado', value: fmt(pendente), color:'#edeade' },
+      ],
+      movResumo: movimentos.length + (ehReceita ? ' receitas em julho' : ' despesas em julho'),
+      movTotal: (ehReceita ? '+ ' : '− ') + fmt(movSoma), movTotalColor: ehReceita ? '#a3c47d' : '#a9553f',
+      finNaoDiv: st.finTab !== 'div',
+      finTemFiltroConta: st.finTab==='rec' || st.finTab==='desp' || st.finTab==='transf',
+      contaFiltro, opcoesContaFiltro, contaFiltroOnChange: e => this.setState({ contaFiltro: e.target.value }),
+      abrirDivida: () => this.setState({ modal:'divida', divForm:{}, divErro:'' }),
+      modalIsDivida: st.modal==='divida', divCampos, divPrevia, salvarDivida,
+      divErro: st.divErro || '', divTemErro: !!st.divErro,
+      finIsMov: st.finTab==='rec' || st.finTab==='desp', finIsDiv: st.finTab==='div', finIsSoc: st.finTab==='soc', finIsTransf: st.finTab==='transf',
+      transferencias, transfResumo: transferencias.length + ' transferência(s) no filtro atual',
+      transfTotal: fmt(transfFiltradas.reduce((a,t) => a+t.valor, 0)),
+      abrirTransf: () => this.setState({ modal:'transf', transfForm:{}, transfErro:'' }),
+      modalIsTransf: st.modal==='transf', salvarTransf,
+      transfOrigem, transfOrigemOnChange: e => setTransf('origem', e.target.value),
+      transfDestino, transfDestinoOnChange: e => setTransf('destino', e.target.value),
+      transfValor: transfForm.valor || '', transfValorOnChange: e => setTransf('valor', e.target.value),
+      transfObs: transfForm.obs || '', transfObsOnChange: e => setTransf('obs', e.target.value),
+      transfPreviaSaida: '− ' + (transfValorNum ? fmt(transfValorNum) : 'R$ 0') + '  saída de ' + transfOrigem,
+      transfPreviaEntrada: '+ ' + (transfValorNum ? fmt(transfValorNum) : 'R$ 0') + '  entrada em ' + transfDestino,
+      transfErro: st.transfErro || '', transfTemErro: !!st.transfErro,
+      navGrupos, navCal: go('cal'), navFin: go('fin'), navLista: go('lista'),
+      listaReservas, totalReservas: listaReservas.length,
+      ocupResumo: ocupPctRef+'%', mesLabelLongo: MESES[st.mes].toLowerCase()+' de 2026',
+      kpis: [
+        { label:'Receita do mês', value: fmt(47250), delta:'+18% vs junho', deltaColor:'#a3c47d' },
+        { label:'Despesas do mês', value: fmt(19874), delta:'safra em pico de colheita', deltaColor:'#8b9174' },
+        { label:'Ocupação fins de semana', value: ocupPctRef+'%', delta: ocupRef+' de '+capacidadeRef+' noites vendáveis (sex/sáb + feriados)', deltaColor:'#8b9174' },
+        { label:'Dívidas em aberto', value: fmt(135530), delta:'3 parcelas vencem em agosto', deltaColor:'#b7c880' },
+      ],
+      proximas,
+      alertas: [
+        { color:'#a9553f', titulo:'Parcela Casa Verona', desc: fmt(3200)+' vence em 05/08' },
+        { color:'#b7c880', titulo:'Check-in duplo sábado', desc:'Rifugio e Verona chegam dia 24 — confirmar limpeza' },
+        { color:'#7d9a4a', titulo:'Secagem', desc:'terreiro 2 pronto para receber lote da semana' },
+      ],
+      resultadoMes: [
+        { label:'Hospedagem', valor: fmt(10330), pct:'36%', color:'#6f8f7a' },
+        { label:'Café', valor: fmt(28400), pct:'100%', color:'#93a35f' },
+        { label:'Despesas', valor:'− '+fmt(19874), pct:'70%', color:'#a9553f' },
+      ],
+      mesLabel: MESES[st.mes]+' 2026', mesAnterior: () => this.setState(s => ({mes: Math.max(0, s.mes-1)})), mesProximo: () => this.setState(s => ({mes: Math.min(11, s.mes+1)})),
+      filtrosCanal, filtrosAcc, diasSemana, calendarios,
+      modalAberto: !!st.modal, modalIsNova: st.modal==='nova', modalIsAnexo: st.modal==='anexo', modalIsLanc: st.modal==='lanc',
+      abrirNova: () => this.setState({ modal:'nova', resErro:false }), abrirAnexo: () => this.setState({ modal:'anexo' }),
+      abrirLanc: () => this.setState({ modal:'lanc', lancTipo:'desp', lancCtx:null }), fecharModal: () => this.setState({ modal:null }),
+      abrirReceita: () => this.setState({ modal:'lanc', lancTipo:'rec', lancCtx:null }), abrirDespesa: () => this.setState({ modal:'lanc', lancTipo:'desp', lancCtx:null }),
+      abrirVendaCafe: () => this.setState({ modal:'lanc', lancTipo:'rec', lancCtx:'cafe' }),
+      acoesRapidas: [
+        { icone:'＋', titulo:'Nova reserva', desc:'Airbnb, WhatsApp ou Instagram', onClick: () => this.setState({ modal:'nova', resErro:false }) },
+        { icone:'📎', titulo:'Anexar comprovante', desc:'Sinal, Pix, nota fiscal', onClick: () => this.setState({ modal:'anexo' }) },
+        { icone:'◎', titulo:'Novo lançamento', desc:'Receita ou despesa', onClick: () => this.setState({ modal:'lanc' }) },
+        { icone:'▤', titulo:'Fechar o mês', desc:'Gerar prestação de contas', onClick: () => this.setState({ screen:'fin', finTab:'soc' }) },
+      ],
+      anexos: [
+        { nome:'comprovante-pix-sinal.pdf', meta:'PDF · 148 KB · enviado em 05/07 por você', cor:'#a3c47d', tag:'Sinal 50%' },
+        { nome:'contrato-hospedagem-assinado.pdf', meta:'PDF · 320 KB · enviado em 05/07', cor:'#c3c6ac', tag:'Contrato' },
+        { nome:'documento-hospede.jpg', meta:'JPG · 1,2 MB · enviado em 22/07', cor:'#c3c6ac', tag:'Documento' },
+      ],
+      res: this.montarReserva(st.resSel || TODAS[3], { ACC, CANAL, MES_CURTO, fmt }),
+      finTabs, movimentos: movimentosFinal, dividas, resultadoTri: fmt(21470),
+      etapas, custosCafe, totalCustoCafe: fmt(40650),
+      estoque: [ {label:'Reservado (contratos)', valor:'56 sacas'}, {label:'Disponível para venda', valor:'92 sacas'}, {label:'Em secagem no terreiro', valor:'~35 sacas est.'} ],
+      vendas,
+    };
+  }
+}
+</script>
+</body>
+</html>

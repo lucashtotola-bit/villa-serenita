@@ -1,0 +1,89 @@
+# Villa Serenità — instruções permanentes
+
+Sistema de gestão da Villa Serenità (Santa Teresa · ES): hospedagem em três acomodações
+(Rifugio Fieline, Casa Vecchia, Casa Verona) e produção de café.
+
+`spec/` é a **especificação**, não código de produção. Em caso de dúvida sobre comportamento,
+`spec/prototipo/Villa Serenita.dc.html` e `spec/Documentacao do projeto.md` mandam; em caso de
+conflito entre os dois, a documentação registra a decisão mais recente. **Nada em `spec/` entra
+no build.**
+
+## Regras de negócio invioláveis (não alterar sem aprovação do dono)
+
+- Sociedade: Lucas Hoffmann Tótola, Michel Hoffmann Tótola, Gilson Tótola, **Rosimere** Hoffmann —
+  cotas fixas de 25%. Lucro sempre rateado igualmente; NÃO criar opção de rateio alternativo.
+- Aportes e devoluções de capital são créditos individuais do sócio, calculados FORA do rateio de
+  lucro. Devolução não pode exceder o aporte em aberto do sócio.
+- Hóspedes são usados EXCLUSIVAMENTE em reservas (seleção obrigatória para salvar). Clientes e
+  fornecedores (tabela separada) são a fonte de compras, despesas e vendas de café.
+- Notas fiscais: destinatário apenas Lucas ou Michel (o sítio não tem CNPJ); anexo do arquivo é
+  OBRIGATÓRIO; pagamento à vista por padrão; "Inserir nova parcela" redivide o total igualmente com
+  vencimentos +30 dias; a soma das parcelas deve bater exatamente com o total.
+- Transferência entre contas gera saída na origem + entrada no destino; nunca é receita nem despesa
+  e não entra no rateio.
+- Conciliação: lançamento conciliado fica somente leitura; prestação de contas só pode ser gerada
+  com o mês 100% conciliado; **desfazer conciliação após o fechamento é privilégio exclusivo do
+  Lucas** e exige registro em log (data, hora, usuário).
+- Venda de café abre pré-preenchida com centro "Café" e categoria "Venda de café"; reserva lança em
+  "Hospedagem — diárias" / centro "Hospedagem".
+- As datas das etapas da safra (tela Safras) são a fonte única do status exibido na tela do Café.
+
+## Arquitetura
+
+- **Banco e nuvem:** Supabase (Postgres + Auth + Storage + RLS).
+- **Login:** Entrar com Google, restrito aos 4 e-mails cadastrados. Qualquer outro é recusado.
+- **Interface:** React + Vite + TypeScript. Reconstruída fielmente a partir do protótipo.
+- **Distribuição:** web hospedada; o `.exe` (Electron) carrega a versão da nuvem, para que ninguém
+  precise reinstalar a cada atualização. O instalador é a **última** etapa do projeto.
+- **Anexos:** fonte da verdade no Supabase Storage, com cópia espelhada no Google Drive do Lucas.
+  A autorização do Google vive **apenas no servidor** (Edge Function) — nunca no cliente.
+
+Estrutura do Drive (o app cria e mantém sozinho), sempre sem acentos:
+
+```
+Villa Serenita/
+├── Notas fiscais/2026/{Lucas, Michel}
+├── Comprovantes de reservas/2026
+├── Comprovantes financeiros/2026
+├── Extratos bancarios/2026
+├── Cafe e safra/2026
+└── Prestacao de contas/2026
+```
+
+Arquivo de NF: `NF-{numero}-{emitente}.pdf`.
+
+## Onde cada regra é garantida
+
+As invariantes contábeis ficam **no banco** (constraints/triggers/policies), não só na interface:
+soma das parcelas = total; devolução ≤ aporte em aberto; lançamento conciliado read-only;
+NF sem anexo rejeitada; destinatário de NF restrito; origem ≠ destino em transferência;
+parcelas de NF/dívida geram despesas previstas; saldos e prestação de contas calculados a partir
+dos lançamentos; `audit_log` alimentado por trigger.
+
+Ficam na aplicação: pré-preenchimentos, cálculo de +30 dias, redivisão de parcelas, UX de
+conciliação.
+
+## Convenções
+
+- Todo texto da interface em português do Brasil; moeda `R$` com formatação pt-BR;
+  CPF mascarado `000.000.000-00` (11 dígitos), CNPJ `00.000.000/0000-00`.
+- Identidade visual: fundo `#161c0d`, cards `#212a14`, primário `#93a35f` (hover `#a8b76e`),
+  terracota `#c2705a`/`#a9553f` para despesa/erro; texto `#edeade` / `#c3c6ac` / `#8b9174`.
+  Instrument Serif (títulos) + Instrument Sans (interface). Cards raio 12px, campos 9px,
+  pills 99px. **Sem emoji decorativo.**
+- Menu agrupado: Operação / Financeiro / Configuração (ver protótipo).
+- Dinheiro: `numeric(14,2)` no Postgres e inteiros de centavos no TypeScript. **Nunca float.**
+- Um commit ao fim de cada etapa concluída.
+
+## O que NÃO fazer
+
+- Não copiar o HTML do protótipo para produção — recriar em React.
+- Não usar os dados de exemplo do protótipo (nomes, CPFs, valores) como dados reais.
+- Não remover validações do protótipo ao recriar telas.
+- Não "melhorar" o design ao converter: reproduzir fielmente.
+- Não expor credenciais do Google/Supabase no cliente.
+
+## Perguntar ao dono antes de decidir
+
+- Divisão do valor de pacotes multi-acomodação nos relatórios.
+- Se a devolução de aporte precisa de aprovação dos demais sócios.
