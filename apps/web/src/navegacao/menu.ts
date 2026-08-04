@@ -64,15 +64,7 @@ export const MENU: GrupoMenu[] = [
     titulo: 'Financeiro',
     itens: [
       { caminho: '/lancamentos', icone: '◎', rotulo: 'Lançamentos' },
-      {
-        caminho: '/notas-fiscais',
-        icone: '▣',
-        rotulo: 'Notas fiscais',
-        etapa: 3,
-        resumo:
-          'Notas emitidas contra Lucas ou Michel, com anexo obrigatório e ' +
-          'parcelamento.',
-      },
+      { caminho: '/notas-fiscais', icone: '▣', rotulo: 'Notas fiscais' },
       {
         caminho: '/conciliacao',
         icone: '⇄',

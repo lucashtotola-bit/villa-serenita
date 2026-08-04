@@ -39,3 +39,10 @@ export function diaMes(iso: string): string {
   const [, mes, dia] = iso.split('-')
   return `${dia}/${mes}`
 }
+
+/** '2026-07-01' + 30 -> '2026-07-31'. Usado no escalonamento de parcelas. */
+export function adicionarDias(iso: string, dias: number): string {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  const d = new Date(ano, mes - 1, dia + dias)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

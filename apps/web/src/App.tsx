@@ -7,6 +7,7 @@ import { AcessoNegado } from './telas/AcessoNegado'
 import { EmConstrucao } from './telas/EmConstrucao'
 import { Cadastros } from './telas/cadastros/Cadastros'
 import { Lancamentos } from './telas/lancamentos/Lancamentos'
+import { NotasFiscais } from './telas/notasFiscais/NotasFiscais'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -39,7 +40,7 @@ function Aplicativo() {
           <Route path="/reservas" element={<EmConstrucao />} />
           <Route path="/cafe" element={<EmConstrucao />} />
           <Route path="/lancamentos" element={<Lancamentos />} />
-          <Route path="/notas-fiscais" element={<EmConstrucao />} />
+          <Route path="/notas-fiscais" element={<NotasFiscais />} />
           <Route path="/conciliacao" element={<EmConstrucao />} />
           <Route path="/cadastros" element={<Cadastros />} />
           <Route path="/safras" element={<EmConstrucao />} />
