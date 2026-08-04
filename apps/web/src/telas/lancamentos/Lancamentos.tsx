@@ -7,6 +7,7 @@ import {
 } from '../../dados/lancamentos'
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/periodo'
+import { ModalLancamento } from './ModalLancamento'
 
 /** Colunas do protótipo (linha 334), com as de texto em fração para não estourar. */
 const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px'
@@ -30,6 +31,7 @@ export function Lancamentos() {
   const [competencia, setCompetencia] = useState(competenciaAtual)
   const [abaId, setAbaId] = useState('rec')
   const [contaId, setContaId] = useState('')
+  const [modalAberto, setModalAberto] = useState(false)
 
   const aba = ABAS.find((a) => a.id === abaId) ?? ABAS[0]
   const saldos = useSaldos()
@@ -105,6 +107,16 @@ export function Lancamentos() {
             </select>
           </label>
         )}
+
+        {(aba.id === 'rec' || aba.id === 'desp') && (
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            className="ml-auto rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
+          >
+            ＋ {aba.id === 'rec' ? 'Nova receita' : 'Nova despesa'}
+          </button>
+        )}
       </div>
 
       {aba.etapa ? (
@@ -128,6 +140,14 @@ export function Lancamentos() {
         </div>
       ) : (
         <Tabela consulta={lancamentos} total={total} receita={aba.tipo === 'Receita'} />
+      )}
+
+      {modalAberto && (aba.id === 'rec' || aba.id === 'desp') && (
+        <ModalLancamento
+          tipo={aba.id === 'rec' ? 'Receita' : 'Despesa'}
+          aoFechar={() => setModalAberto(false)}
+          aoSalvar={() => setModalAberto(false)}
+        />
       )}
     </div>
   )
@@ -311,17 +331,21 @@ function Linha({ lancamento: l, receita }: { lancamento: Lancamento; receita: bo
       </span>
 
       <span className="flex justify-end">
-        <Situacao lancamento={l} />
+        <Situacao lancamento={l} receita={receita} />
       </span>
     </div>
   )
 }
 
-function Situacao({ lancamento: l }: { lancamento: Lancamento }) {
+/**
+ * Mostra a situação em linguagem comum. O banco guarda "Prevista" e
+ * "Realizada"; quem usa o sistema lê "A pagar" e "Pago".
+ */
+function Situacao({ lancamento: l, receita }: { lancamento: Lancamento; receita: boolean }) {
   if (l.conciliado) {
     return (
       <span
-        title="Conciliado com o extrato — somente leitura"
+        title="Conferido com o extrato do banco — não pode mais ser alterado"
         className="rounded-pill bg-primaria/15 px-2.5 py-[3px] text-[11.5px] text-verde-suave"
       >
         Conciliado
@@ -334,13 +358,13 @@ function Situacao({ lancamento: l }: { lancamento: Lancamento }) {
         title={`Vence em ${diaMes(l.data_vencimento)}`}
         className="rounded-pill border border-borda-campo px-2.5 py-[3px] text-[11.5px] text-texto-3"
       >
-        Prevista
+        {receita ? 'A receber' : 'A pagar'}
       </span>
     )
   }
   return (
     <span className="rounded-pill bg-white/[0.06] px-2.5 py-[3px] text-[11.5px] text-texto-2">
-      Realizada
+      {receita ? 'Recebido' : 'Pago'}
     </span>
   )
 }

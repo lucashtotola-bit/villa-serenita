@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import { limitesDoMes } from '../lib/periodo'
 import { traduzirErro } from './cadastros'
@@ -73,6 +73,36 @@ export function useLancamentos(opcoes: {
       const { data, error } = await consulta
       if (error) throw new Error(traduzirErro(error))
       return (data ?? []) as unknown as Lancamento[]
+    },
+  })
+}
+
+export type NovoLancamento = {
+  tipo: 'Receita' | 'Despesa'
+  situacao: 'Prevista' | 'Realizada'
+  descricao: string
+  valor: string
+  data_vencimento: string
+  data_pagamento: string | null
+  conta_id: string
+  categoria_id: string
+  centro_id: string
+  clifor_id: string | null
+  observacao: string | null
+}
+
+export function useCriarLancamento() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (novo: NovoLancamento) => {
+      const { error } = await supabase.from('lancamentos').insert(novo)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      // O saldo das contas deriva dos lançamentos, então acompanha a gravação.
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
     },
   })
 }
