@@ -37,13 +37,7 @@ export const MENU: GrupoMenu[] = [
       },
       { caminho: '/calendario', icone: '▦', rotulo: 'Calendário' },
       { caminho: '/reservas', icone: '◍', rotulo: 'Reservas' },
-      {
-        caminho: '/cafe',
-        icone: '✳',
-        rotulo: 'Café',
-        etapa: 5,
-        resumo: 'Etapas da safra, custos, estoque e vendas de café.',
-      },
+      { caminho: '/cafe', icone: '✳', rotulo: 'Café' },
     ],
   },
   {

@@ -12,6 +12,7 @@ import { Dividas } from './telas/dividas/Dividas'
 import { Reservas } from './telas/reservas/Reservas'
 import { Calendario } from './telas/reservas/Calendario'
 import { Safras } from './telas/safras/Safras'
+import { Cafe } from './telas/cafe/Cafe'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -42,7 +43,7 @@ function Aplicativo() {
           <Route path="/" element={<EmConstrucao />} />
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/reservas" element={<Reservas />} />
-          <Route path="/cafe" element={<EmConstrucao />} />
+          <Route path="/cafe" element={<Cafe />} />
           <Route path="/lancamentos" element={<Lancamentos />} />
           <Route path="/notas-fiscais" element={<NotasFiscais />} />
           <Route path="/dividas" element={<Dividas />} />
