@@ -52,7 +52,7 @@ export function ModalReserva({
 
   const categorias = useMemo(() => categoriasDe(opcoes.data, 'Receita'), [opcoes.data])
   const centros = useMemo(() => centrosDe(opcoes.data, 'Receita'), [opcoes.data])
-  const contas = opcoes.data?.contas ?? []
+  const contas = useMemo(() => opcoes.data?.contas ?? [], [opcoes.data])
 
   useEffect(() => {
     if (contas.length === 1) setContaId(contas[0].id)

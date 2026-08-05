@@ -42,7 +42,7 @@ export function Cafe() {
   const rendimentos = useRendimentos(safraId || undefined)
   const vendas = useVendasCafe(safraId || undefined)
 
-  const saldos = estoque.data ?? []
+  const saldos = useMemo(() => estoque.data ?? [], [estoque.data])
   const etapa = safra ? etapaAtual(safra, hoje) : null
 
   const kpis = useMemo(() => {

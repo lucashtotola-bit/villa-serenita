@@ -133,7 +133,7 @@ export function slugArquivo(nome: string): string {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
   return semAcento
-    .replace(/[^a-zA-Z0-9.\-]+/g, '-')
+    .replace(/[^a-zA-Z0-9.-]+/g, '-')
     .replace(/-+/g, '-')
     .toLowerCase()
 }

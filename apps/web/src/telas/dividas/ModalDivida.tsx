@@ -60,7 +60,7 @@ export function ModalDivida({
   const credores = useMemo(() => cliforDe(opcoes.data, 'Despesa'), [opcoes.data])
   const categorias = useMemo(() => categoriasDe(opcoes.data, 'Despesa'), [opcoes.data])
   const centros = useMemo(() => centrosDe(opcoes.data, 'Despesa'), [opcoes.data])
-  const contas = opcoes.data?.contas ?? []
+  const contas = useMemo(() => opcoes.data?.contas ?? [], [opcoes.data])
 
   useEffect(() => {
     if (contas.length === 1) setContaId(contas[0].id)

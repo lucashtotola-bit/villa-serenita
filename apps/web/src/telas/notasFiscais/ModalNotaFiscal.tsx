@@ -47,7 +47,7 @@ export function ModalNotaFiscal({
   const fornecedores = useMemo(() => cliforDe(opcoes.data, 'Despesa'), [opcoes.data])
   const categorias = useMemo(() => categoriasDe(opcoes.data, 'Despesa'), [opcoes.data])
   const centros = useMemo(() => centrosDe(opcoes.data, 'Despesa'), [opcoes.data])
-  const contas = opcoes.data?.contas ?? []
+  const contas = useMemo(() => opcoes.data?.contas ?? [], [opcoes.data])
 
   useEffect(() => {
     if (destinatarios.data?.length === 1) setDestinatarioId(destinatarios.data[0].id)

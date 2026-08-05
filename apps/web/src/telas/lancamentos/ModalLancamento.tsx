@@ -65,7 +65,7 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
   const categorias = useMemo(() => categoriasDe(opcoes.data, tipo), [opcoes.data, tipo])
   const centros = useMemo(() => centrosDe(opcoes.data, tipo), [opcoes.data, tipo])
   const pessoas = useMemo(() => cliforDe(opcoes.data, tipo), [opcoes.data, tipo])
-  const contas = opcoes.data?.contas ?? []
+  const contas = useMemo(() => opcoes.data?.contas ?? [], [opcoes.data])
 
   // Pré-seleciona quando há uma opção só: menos um clique no caso comum. Só
   // faz sentido ao criar — ao editar, os campos já vêm preenchidos.
