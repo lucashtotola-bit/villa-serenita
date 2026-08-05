@@ -65,6 +65,7 @@ export const MENU: GrupoMenu[] = [
     itens: [
       { caminho: '/lancamentos', icone: '◎', rotulo: 'Lançamentos' },
       { caminho: '/notas-fiscais', icone: '▣', rotulo: 'Notas fiscais' },
+      { caminho: '/dividas', icone: '◇', rotulo: 'Dívidas' },
       {
         caminho: '/conciliacao',
         icone: '⇄',

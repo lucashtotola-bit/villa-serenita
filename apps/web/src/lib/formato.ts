@@ -64,6 +64,31 @@ export function paraCentavos(valor: string): number {
   return d ? parseInt(d, 10) : 0
 }
 
+/**
+ * Lê um valor solto colado de fora — carnê, PDF do banco, coluna do Excel.
+ * Diferente de `paraCentavos`, que assume que os dígitos JÁ são centavos
+ * (comportamento certo para quem digita da direita para a esquerda num campo
+ * com máscara), aqui o número vem pronto e precisa ser interpretado:
+ *
+ *   '1.234,56' -> 123456     'R$ 560,00' -> 56000
+ *   '560'      -> 56000      '1.234'     -> 123400
+ *
+ * Só conta como centavos o que vier depois de um separador seguido de
+ * exatamente duas casas; sem isso, '560' viraria R$ 5,60.
+ * Devolve null quando a linha não tem número nenhum.
+ */
+export function centavosDeTexto(texto: string): number | null {
+  const limpo = texto.replace(/[^\d.,]/g, '')
+  if (!/\d/.test(limpo)) return null
+
+  const decimal = /[.,](\d{2})$/.exec(limpo)
+  if (decimal) {
+    const reais = soDigitos(limpo.slice(0, decimal.index))
+    return parseInt(reais || '0', 10) * 100 + parseInt(decimal[1], 10)
+  }
+  return parseInt(soDigitos(limpo), 10) * 100
+}
+
 /** 123450 -> '1.234,50' — o que aparece no campo enquanto se digita. */
 export function mascaraDinheiro(valor: string): string {
   const centavos = paraCentavos(valor)

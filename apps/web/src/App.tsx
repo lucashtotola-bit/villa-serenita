@@ -8,6 +8,7 @@ import { EmConstrucao } from './telas/EmConstrucao'
 import { Cadastros } from './telas/cadastros/Cadastros'
 import { Lancamentos } from './telas/lancamentos/Lancamentos'
 import { NotasFiscais } from './telas/notasFiscais/NotasFiscais'
+import { Dividas } from './telas/dividas/Dividas'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -41,6 +42,7 @@ function Aplicativo() {
           <Route path="/cafe" element={<EmConstrucao />} />
           <Route path="/lancamentos" element={<Lancamentos />} />
           <Route path="/notas-fiscais" element={<NotasFiscais />} />
+          <Route path="/dividas" element={<Dividas />} />
           <Route path="/conciliacao" element={<EmConstrucao />} />
           <Route path="/cadastros" element={<Cadastros />} />
           <Route path="/safras" element={<EmConstrucao />} />

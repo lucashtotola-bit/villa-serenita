@@ -40,6 +40,18 @@ export function diaMes(iso: string): string {
   return `${dia}/${mes}`
 }
 
+/**
+ * '2026-01-31' + 1 mês -> '2026-02-28'. Usado no escalonamento de parcelas de
+ * dívida, que seguem periodicidade e não intervalo fixo de dias. Vencimento
+ * que não existe no mês de destino cai no último dia dele, como faz o banco.
+ */
+export function adicionarMeses(iso: string, meses: number): string {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  const ultimoDia = new Date(ano, mes - 1 + meses + 1, 0).getDate()
+  const d = new Date(ano, mes - 1 + meses, Math.min(dia, ultimoDia))
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /** '2026-07-01' + 30 -> '2026-07-31'. Usado no escalonamento de parcelas. */
 export function adicionarDias(iso: string, dias: number): string {
   const [ano, mes, dia] = iso.split('-').map(Number)
