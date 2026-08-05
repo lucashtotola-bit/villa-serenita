@@ -10,6 +10,7 @@ import {
 } from '../../dados/notasFiscais'
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { adicionarDias, diaMes } from '../../lib/periodo'
+import { ModalAnexoNf } from './ModalAnexoNf'
 import { ModalNotaFiscal } from './ModalNotaFiscal'
 
 type Aba = 'todas' | 'abertas' | 'vencidas' | 'quitadas'
@@ -279,6 +280,7 @@ function Linha({
 }) {
   const proxima = proximaParcela(nf)
   const pagas = nf.nf_parcelas.filter((p) => p.lancamentos?.situacao === 'Realizada').length
+  const [modalAnexoAberto, setModalAnexoAberto] = useState(false)
 
   return (
     <div
@@ -315,18 +317,33 @@ function Linha({
 
       <span className="text-right">
         {semAnexo ? (
-          <span
-            title="Documento ainda não anexado"
-            className="text-[12px] text-terracota-clara"
+          <button
+            type="button"
+            onClick={() => setModalAnexoAberto(true)}
+            title="Documento ainda não anexado — clique para enviar"
+            className="text-[12px] text-terracota-clara hover:underline"
           >
             pendente
-          </span>
+          </button>
         ) : (
-          <span title="Documento anexado" className="text-[12px] text-primaria-clara">
+          <button
+            type="button"
+            onClick={() => setModalAnexoAberto(true)}
+            title="Documento anexado — clique para ver ou substituir"
+            className="text-[12px] text-primaria-clara hover:underline"
+          >
             ▤ ver
-          </span>
+          </button>
         )}
       </span>
+
+      {modalAnexoAberto && (
+        <ModalAnexoNf
+          notaFiscalId={nf.id}
+          numeroNf={nf.numero}
+          aoFechar={() => setModalAnexoAberto(false)}
+        />
+      )}
     </div>
   )
 }

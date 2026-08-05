@@ -97,3 +97,18 @@ export function formatarData(iso: string): string {
   const [ano, mes, dia] = iso.split('-')
   return `${dia}/${mes}/${ano}`
 }
+
+/**
+ * Nome de arquivo seguro para o Storage: sem acento, sem espaço, sem
+ * caractere especial. Usado só no caminho salvo no banco — o nome original
+ * continua exibido na tela.
+ */
+export function slugArquivo(nome: string): string {
+  const semAcento = nome
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+  return semAcento
+    .replace(/[^a-zA-Z0-9.\-]+/g, '-')
+    .replace(/-+/g, '-')
+    .toLowerCase()
+}
