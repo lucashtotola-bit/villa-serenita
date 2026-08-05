@@ -46,15 +46,7 @@ export const MENU: GrupoMenu[] = [
       { caminho: '/lancamentos', icone: '◎', rotulo: 'Lançamentos' },
       { caminho: '/notas-fiscais', icone: '▣', rotulo: 'Notas fiscais' },
       { caminho: '/dividas', icone: '◇', rotulo: 'Dívidas' },
-      {
-        caminho: '/conciliacao',
-        icone: '⇄',
-        rotulo: 'Conciliação',
-        etapa: 6,
-        resumo:
-          'Importação do extrato OFX e conferência linha a linha contra os ' +
-          'lançamentos.',
-      },
+      { caminho: '/conciliacao', icone: '⇄', rotulo: 'Conciliação' },
     ],
   },
   {
