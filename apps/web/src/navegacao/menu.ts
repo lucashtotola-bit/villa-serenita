@@ -35,13 +35,7 @@ export const MENU: GrupoMenu[] = [
           'Painéis com receita e despesa do mês, próximas chegadas, alertas e ' +
           'notas fiscais acumuladas por sócio.',
       },
-      {
-        caminho: '/calendario',
-        icone: '▦',
-        rotulo: 'Calendário',
-        etapa: 4,
-        resumo: 'Ocupação das três acomodações mês a mês, com filtro por canal.',
-      },
+      { caminho: '/calendario', icone: '▦', rotulo: 'Calendário' },
       { caminho: '/reservas', icone: '◍', rotulo: 'Reservas' },
       {
         caminho: '/cafe',
