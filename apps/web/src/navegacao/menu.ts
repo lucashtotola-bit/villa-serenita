@@ -42,15 +42,7 @@ export const MENU: GrupoMenu[] = [
         etapa: 4,
         resumo: 'Ocupação das três acomodações mês a mês, com filtro por canal.',
       },
-      {
-        caminho: '/reservas',
-        icone: '◍',
-        rotulo: 'Reservas',
-        etapa: 4,
-        resumo:
-          'Lista de reservas, cadastro de nova reserva com hóspede obrigatório ' +
-          'e o detalhe de cada estadia.',
-      },
+      { caminho: '/reservas', icone: '◍', rotulo: 'Reservas' },
       {
         caminho: '/cafe',
         icone: '✳',
