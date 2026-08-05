@@ -23,6 +23,8 @@ import {
   limitesDoMes,
   rotuloMes,
 } from '../../lib/periodo'
+import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
+import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { ModalReserva } from './ModalReserva'
 
 export function Calendario() {
@@ -91,24 +93,22 @@ export function Calendario() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[34px] leading-tight text-texto">Calendário</h1>
-          <p className="mt-1 text-[13px] text-texto-3">
-            Ocupação medida sobre as noites vendáveis — sextas e sábados.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setModalAberto(true)}
-          className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
-        >
-          ＋ Nova reserva
-        </button>
-      </div>
+      <CabecalhoPagina
+        titulo="Calendário"
+        subtitulo="Ocupação medida sobre as noites vendáveis — sextas e sábados."
+        acao={
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
+          >
+            ＋ Nova reserva
+          </button>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-1 rounded-[10px] border border-borda bg-card p-1.5">
+        <div className="flex items-center gap-1 rounded-grupo border border-borda bg-card p-1.5">
           <button
             type="button"
             onClick={() => setCompetencia((c) => deslocarMes(c, -1))}
@@ -161,17 +161,17 @@ export function Calendario() {
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
-            <Kpi
+            <CartaoKpi
               rotulo="Ocupação do mês"
               valor={`${resumoGeral.ocupacao}%`}
               detalhe={`sobre ${vendaveis} noite(s) vendável(is) por casa`}
             />
-            <Kpi
+            <CartaoKpi
               rotulo="Reservas no mês"
               valor={String(resumoGeral.qtd)}
               detalhe={canalFiltro ? `canal ${canalFiltro}` : 'todos os canais'}
             />
-            <Kpi
+            <CartaoKpi
               rotulo="Valor das estadias"
               valor={formatarDinheiro(resumoGeral.receita)}
               detalhe="total das reservas que tocam o mês"
@@ -281,7 +281,7 @@ function GradeCasa({
         ))}
       </div>
 
-      <p className="mt-3 border-t border-borda pt-2.5 text-[11.5px] text-texto-3">
+      <p className="mt-3 border-t border-borda pt-2.5 text-[11.5px] text-texto-3 tabular-nums">
         {reservasDaCasa.size} reserva(s) · {formatarDinheiro(receita)}
       </p>
     </div>
@@ -346,24 +346,6 @@ function Celula({
     >
       {dia}
     </span>
-  )
-}
-
-function Kpi({
-  rotulo,
-  valor,
-  detalhe,
-}: {
-  rotulo: string
-  valor: string
-  detalhe: string
-}) {
-  return (
-    <div className="rounded-card border border-borda bg-card p-4">
-      <p className="text-[11px] tracking-[0.06em] text-texto-3 uppercase">{rotulo}</p>
-      <p className="mt-1.5 font-serif text-[25px] text-texto">{valor}</p>
-      <p className="mt-1 text-[11.5px] text-texto-3">{detalhe}</p>
-    </div>
   )
 }
 

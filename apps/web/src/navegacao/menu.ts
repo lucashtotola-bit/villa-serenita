@@ -67,15 +67,7 @@ export const MENU: GrupoMenu[] = [
     titulo: 'Configuração',
     itens: [
       { caminho: '/cadastros', icone: '☰', rotulo: 'Cadastros' },
-      {
-        caminho: '/safras',
-        icone: '❋',
-        rotulo: 'Safras',
-        etapa: 5,
-        resumo:
-          'Datas das etapas da safra e expectativa de colheita. É a fonte do ' +
-          'status exibido na tela do Café.',
-      },
+      { caminho: '/safras', icone: '❋', rotulo: 'Safras' },
     ],
   },
 ]

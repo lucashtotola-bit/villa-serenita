@@ -9,6 +9,9 @@ import {
 } from '../../dados/reservas'
 import { decimalParaCentavos, formatarDinheiro, formatarData } from '../../lib/formato'
 import { adicionarDias } from '../../lib/periodo'
+import { BarraAbas } from '../../componentes/BarraAbas'
+import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
+import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { ModalReserva } from './ModalReserva'
 
 type Aba = 'proximas' | 'pre-reservas' | 'todas' | 'canceladas'
@@ -84,21 +87,19 @@ export function Reservas() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[34px] leading-tight text-texto">Reservas</h1>
-          <p className="mt-1 text-[13px] text-texto-3">
-            O sinal confirma e garante a data; o saldo é recebido na chegada.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setModalAberto(true)}
-          className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
-        >
-          ＋ Nova reserva
-        </button>
-      </div>
+      <CabecalhoPagina
+        titulo="Reservas"
+        subtitulo="O sinal confirma e garante a data; o saldo é recebido na chegada."
+        acao={
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
+          >
+            ＋ Nova reserva
+          </button>
+        }
+      />
 
       {reservas.isPending ? (
         <p className="text-[13px] text-texto-3">Carregando…</p>
@@ -110,39 +111,18 @@ export function Reservas() {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {kpis.map((k) => (
-              <div key={k.rotulo} className="rounded-card border border-borda bg-card p-4">
-                <p className="text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-                  {k.rotulo}
-                </p>
-                <p
-                  className={`mt-1.5 font-serif text-[25px] ${
-                    'alerta' in k && k.alerta ? 'text-terracota-clara' : 'text-texto'
-                  }`}
-                >
-                  {k.valor}
-                </p>
-                <p className="mt-1 truncate text-[11.5px] text-texto-3" title={k.detalhe}>
-                  {k.detalhe}
-                </p>
-              </div>
+              <CartaoKpi
+                key={k.rotulo}
+                rotulo={k.rotulo}
+                valor={k.valor}
+                detalhe={k.detalhe}
+                alerta={'alerta' in k && k.alerta}
+              />
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-1.5 rounded-[10px] border border-borda bg-card p-1.5">
-            {ABAS.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                onClick={() => setAba(a.id)}
-                className={`rounded-[7px] px-4 py-2 text-[13px] transition-colors ${
-                  a.id === aba
-                    ? 'bg-primaria/15 font-medium text-verde-suave'
-                    : 'text-texto-3 hover:text-texto-2'
-                }`}
-              >
-                {a.rotulo}
-              </button>
-            ))}
+          <div className="mt-4">
+            <BarraAbas abas={ABAS} ativa={aba} aoMudar={setAba} />
           </div>
 
           <div className="mt-3.5 overflow-x-auto rounded-card border border-borda bg-card">
@@ -244,7 +224,7 @@ function Linha({ reserva: r, hoje }: { reserva: Reserva; hoje: string }) {
         ))}
       </div>
 
-      <div className="text-right">
+      <div className="text-right tabular-nums">
         <div className="font-medium text-texto">{formatarDinheiro(total)}</div>
         {aReceber > 0 && (
           <div className="mt-[3px] text-[11.5px] text-texto-3">

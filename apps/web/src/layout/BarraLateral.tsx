@@ -43,21 +43,34 @@ export function BarraLateral() {
                 to={item.caminho}
                 end={item.caminho === '/'}
                 className={({ isActive }) =>
-                  'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors ' +
+                  'relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm transition-colors ' +
                   (isActive
                     ? 'bg-primaria/[0.13] font-medium text-verde-suave'
                     : 'text-texto-2 hover:bg-white/5')
                 }
               >
-                <span className="w-5 text-center opacity-80">{item.icone}</span>
-                {item.rotulo}
+                {({ isActive }) => (
+                  <>
+                    <span
+                      aria-hidden
+                      className="absolute inset-y-1.5 left-0 w-[3px] rounded-full"
+                      style={
+                        isActive
+                          ? { backgroundImage: 'var(--gradiente-assinatura)' }
+                          : undefined
+                      }
+                    />
+                    <span className="w-5 text-center opacity-80">{item.icone}</span>
+                    {item.rotulo}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
         ))}
       </nav>
 
-      <div className="mt-auto rounded-[10px] border border-borda bg-card p-3.5">
+      <div className="mt-auto rounded-grupo border border-borda bg-card p-3.5">
         <div className="text-[10.5px] tracking-[0.06em] text-texto-3 uppercase">
           Conectado como
         </div>

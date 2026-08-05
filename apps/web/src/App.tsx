@@ -11,6 +11,7 @@ import { NotasFiscais } from './telas/notasFiscais/NotasFiscais'
 import { Dividas } from './telas/dividas/Dividas'
 import { Reservas } from './telas/reservas/Reservas'
 import { Calendario } from './telas/reservas/Calendario'
+import { Safras } from './telas/safras/Safras'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -47,7 +48,7 @@ function Aplicativo() {
           <Route path="/dividas" element={<Dividas />} />
           <Route path="/conciliacao" element={<EmConstrucao />} />
           <Route path="/cadastros" element={<Cadastros />} />
-          <Route path="/safras" element={<EmConstrucao />} />
+          <Route path="/safras" element={<Safras />} />
           {/* Endereço desconhecido volta para a Visão geral. */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

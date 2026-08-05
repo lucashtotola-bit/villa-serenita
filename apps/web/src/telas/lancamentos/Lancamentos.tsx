@@ -8,6 +8,8 @@ import {
 } from '../../dados/lancamentos'
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/periodo'
+import { BarraAbas } from '../../componentes/BarraAbas'
+import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { ModalLancamento } from './ModalLancamento'
 import { PainelTransferencias } from './PainelTransferencias'
 
@@ -56,42 +58,24 @@ export function Lancamentos() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[34px] leading-tight text-texto">Financeiro</h1>
-          <p className="mt-1 text-[13px] text-texto-3">
-            Receitas, despesas e movimentação entre contas.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <BotaoMes rotulo="‹" aoClicar={() => setCompetencia(deslocarMes(competencia, -1))} />
-          <span className="min-w-[150px] text-center text-[14px] text-texto">
-            {rotuloMes(competencia)}
-          </span>
-          <BotaoMes rotulo="›" aoClicar={() => setCompetencia(deslocarMes(competencia, 1))} />
-        </div>
-      </div>
+      <CabecalhoPagina
+        titulo="Financeiro"
+        subtitulo="Receitas, despesas e movimentação entre contas."
+        acao={
+          <div className="flex items-center gap-1">
+            <BotaoMes rotulo="‹" aoClicar={() => setCompetencia(deslocarMes(competencia, -1))} />
+            <span className="min-w-[150px] text-center text-[14px] text-texto">
+              {rotuloMes(competencia)}
+            </span>
+            <BotaoMes rotulo="›" aoClicar={() => setCompetencia(deslocarMes(competencia, 1))} />
+          </div>
+        }
+      />
 
       <Saldos consulta={saldos} />
 
       <div className="mt-6 mb-4 flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-1.5 rounded-[10px] border border-borda bg-card p-1.5">
-          {ABAS.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => setAbaId(a.id)}
-              className={`rounded-[7px] px-4 py-2 text-[13px] transition-colors ${
-                a.id === abaId
-                  ? 'bg-primaria/15 font-medium text-verde-suave'
-                  : 'text-texto-3 hover:text-texto-2'
-              }`}
-            >
-              {a.rotulo}
-            </button>
-          ))}
-        </div>
+        <BarraAbas abas={ABAS} ativa={abaId} aoMudar={setAbaId} />
 
         {aba.tipo && (
           <label className="flex items-center gap-2 text-[12px] text-texto-3">
@@ -208,7 +192,7 @@ function Saldos({ consulta }: { consulta: ReturnType<typeof useSaldos> }) {
               {c.banco} · {c.apelido}
             </p>
             <p
-              className={`mt-1.5 font-serif text-[26px] ${
+              className={`mt-1.5 font-serif text-[26px] tabular-nums ${
                 saldo < 0 ? 'text-terracota-clara' : 'text-texto'
               }`}
             >
@@ -284,7 +268,7 @@ function Tabela({
               {linhas.length > 1 ? 's' : ''} no mês
             </span>
             <span
-              className={`font-serif text-[22px] ${
+              className={`font-serif text-[22px] tabular-nums ${
                 receita ? 'text-verde-claro' : 'text-terracota-escura'
               }`}
             >
@@ -346,7 +330,7 @@ function Linha({
       </span>
 
       <span
-        className={`text-right font-medium ${
+        className={`text-right font-medium tabular-nums ${
           prevista ? 'text-texto-3'
           : receita ? 'text-verde-claro'
           : 'text-terracota-escura'

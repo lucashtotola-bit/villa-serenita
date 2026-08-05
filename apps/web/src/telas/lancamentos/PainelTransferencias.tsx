@@ -23,7 +23,7 @@ export function PainelTransferencias({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3 rounded-[10px] border border-primaria/20 bg-primaria/[0.07] px-4 py-3 text-[12.5px] text-texto-2">
+      <div className="flex flex-wrap items-center gap-3 rounded-grupo border border-primaria/20 bg-primaria/[0.07] px-4 py-3 text-[12.5px] text-texto-2">
         <span className="text-verde-suave">⇄</span>
         <span className="min-w-0 flex-1">
           Movimentação apenas de caixa — cada transferência gera uma saída na
@@ -114,7 +114,7 @@ function Linha({ transferencia: t }: { transferencia: Transferencia }) {
         <div className="truncate text-texto">
           {origem ? `${origem.banco} · ${origem.apelido}` : '—'}
         </div>
-        <div className="mt-[3px] text-[11.5px] text-terracota-escura">
+        <div className="mt-[3px] text-[11.5px] text-terracota-escura tabular-nums">
           − {formatarDinheiro(valor)}
         </div>
       </div>
@@ -125,12 +125,12 @@ function Linha({ transferencia: t }: { transferencia: Transferencia }) {
         <div className="truncate text-texto">
           {destino ? `${destino.banco} · ${destino.apelido}` : '—'}
         </div>
-        <div className="mt-[3px] text-[11.5px] text-verde-claro">
+        <div className="mt-[3px] text-[11.5px] text-verde-claro tabular-nums">
           + {formatarDinheiro(valor)}
         </div>
       </div>
 
-      <span className="text-right font-medium text-texto-2">
+      <span className="text-right font-medium text-texto-2 tabular-nums">
         {formatarDinheiro(valor)}
       </span>
 

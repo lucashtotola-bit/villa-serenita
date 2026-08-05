@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { CabecalhoPagina } from '../componentes/CabecalhoPagina'
 import { ITENS_MENU } from '../navegacao/menu'
 
 /**
@@ -11,11 +12,9 @@ export function EmConstrucao() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="font-serif text-[34px] leading-tight text-texto">
-        {item?.rotulo ?? 'Tela'}
-      </h1>
+      <CabecalhoPagina titulo={item?.rotulo ?? 'Tela'} />
 
-      <div className="mt-6 rounded-card border border-borda bg-card p-6">
+      <div className="rounded-card border border-borda bg-card p-6">
         <span className="inline-block rounded-pill border border-borda-campo px-3 py-1 text-[12px] text-texto-3">
           Em construção · Etapa {item?.etapa}
         </span>

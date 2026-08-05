@@ -44,10 +44,16 @@
   --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --font-sans: 'Instrument Sans', system-ui, -apple-system, sans-serif;
 
-  /* Raios — cards 12px, campos 9px, pills 99px */
+  /* Raios — cards 12px, campos 9px, grupos (abas/filtros) 10px, pills 99px */
   --radius-card: 12px;
   --radius-campo: 9px;
+  --radius-grupo: 10px;
   --radius-pill: 99px;
+
+  /* Assinatura visual: café (verde) encontra hospedagem (terracota).
+     Usado com moderação — indicador do menu ativo e filete sob títulos. */
+  --gradiente-assinatura: linear-gradient(180deg, #93a35f, #c2705a);
+  --gradiente-assinatura-h: linear-gradient(90deg, #93a35f, #c2705a);
 }
 
 @layer base {
@@ -74,5 +80,18 @@
   }
   ::-webkit-scrollbar-track {
     background: transparent;
+  }
+
+  /* Foco de teclado consistente em toda a interface — nenhum componente
+     precisa declarar o próprio anel. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--color-primaria-clara);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }

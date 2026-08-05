@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useCadastro, type Registro } from '../../dados/cadastros'
+import { BarraAbas } from '../../componentes/BarraAbas'
+import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { CADASTROS, type DefinicaoCadastro } from './definicoes'
 import { ModalCadastro } from './ModalCadastro'
 
@@ -9,32 +11,14 @@ export function Cadastros() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[34px] leading-tight text-texto">
-            Cadastros
-          </h1>
-          <p className="mt-1 text-[13px] text-texto-3">
-            Dados usados nas demais telas do sistema.
-          </p>
-        </div>
-      </div>
+      <CabecalhoPagina titulo="Cadastros" subtitulo="Dados usados nas demais telas do sistema." />
 
-      <div className="mb-5 flex flex-wrap items-center gap-1.5 rounded-campo border border-borda bg-card p-1.5">
-        {CADASTROS.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => setAbaId(c.id)}
-            className={`rounded-[7px] px-4 py-2 text-[13px] transition-colors ${
-              c.id === abaId
-                ? 'bg-primaria/15 font-medium text-verde-suave'
-                : 'text-texto-3 hover:text-texto-2'
-            }`}
-          >
-            {c.aba}
-          </button>
-        ))}
+      <div className="mb-5">
+        <BarraAbas
+          abas={CADASTROS.map((c) => ({ id: c.id, rotulo: c.aba }))}
+          ativa={abaId}
+          aoMudar={setAbaId}
+        />
       </div>
 
       {/* `key` remonta a aba ao trocar, zerando estados locais da tabela. */}

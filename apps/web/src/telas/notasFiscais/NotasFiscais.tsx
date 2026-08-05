@@ -10,6 +10,9 @@ import {
 } from '../../dados/notasFiscais'
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { adicionarDias, diaMes } from '../../lib/periodo'
+import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
+import { CartaoKpi } from '../../componentes/CartaoKpi'
+import { BarraAbas } from '../../componentes/BarraAbas'
 import { ModalAnexoNf } from './ModalAnexoNf'
 import { ModalNotaFiscal } from './ModalNotaFiscal'
 
@@ -107,21 +110,19 @@ export function NotasFiscais() {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-[34px] leading-tight text-texto">Notas fiscais</h1>
-          <p className="mt-1 text-[13px] text-texto-3">
-            Emitidas contra Lucas ou Michel — o sítio não tem CNPJ.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setModalAberto(true)}
-          className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
-        >
-          ＋ Nova nota fiscal
-        </button>
-      </div>
+      <CabecalhoPagina
+        titulo="Notas fiscais"
+        subtitulo="Emitidas contra Lucas ou Michel — o sítio não tem CNPJ."
+        acao={
+          <button
+            type="button"
+            onClick={() => setModalAberto(true)}
+            className="rounded-campo bg-primaria px-4 py-2.5 text-[13.5px] font-semibold whitespace-nowrap text-fundo transition-colors hover:bg-primaria-clara"
+          >
+            ＋ Nova nota fiscal
+          </button>
+        }
+      />
 
       {notas.isPending ? (
         <p className="text-[13px] text-texto-3">Carregando…</p>
@@ -131,39 +132,18 @@ export function NotasFiscais() {
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {kpis.map((k) => (
-              <div key={k.rotulo} className="rounded-card border border-borda bg-card p-4">
-                <p className="text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-                  {k.rotulo}
-                </p>
-                <p
-                  className={`mt-1.5 font-serif text-[25px] ${
-                    'alerta' in k && k.alerta ? 'text-terracota-clara' : 'text-texto'
-                  }`}
-                >
-                  {k.valor}
-                </p>
-                <p className="mt-1 text-[11.5px] text-texto-3">{k.detalhe}</p>
-              </div>
+              <CartaoKpi
+                key={k.rotulo}
+                rotulo={k.rotulo}
+                valor={k.valor}
+                detalhe={k.detalhe}
+                alerta={'alerta' in k && k.alerta}
+              />
             ))}
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <div className="flex flex-wrap gap-1.5 rounded-[10px] border border-borda bg-card p-1.5">
-              {ABAS.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  onClick={() => setAba(a.id)}
-                  className={`rounded-[7px] px-4 py-2 text-[13px] transition-colors ${
-                    a.id === aba
-                      ? 'bg-primaria/15 font-medium text-verde-suave'
-                      : 'text-texto-3 hover:text-texto-2'
-                  }`}
-                >
-                  {a.rotulo}
-                </button>
-              ))}
-            </div>
+            <BarraAbas abas={ABAS} ativa={aba} aoMudar={setAba} />
 
             <div className="flex flex-wrap gap-1.5">
               <ChipDestino
@@ -216,7 +196,7 @@ export function NotasFiscais() {
                   <span className="text-[12.5px] text-texto-3">
                     {filtradas.length} nota(s) no filtro atual
                   </span>
-                  <span className="font-serif text-[21px] text-texto">
+                  <span className="font-serif text-[21px] text-texto tabular-nums">
                     {formatarDinheiro(totalFiltro)}
                   </span>
                 </div>
@@ -224,7 +204,7 @@ export function NotasFiscais() {
             </div>
           </div>
 
-          <div className="mt-3.5 rounded-[10px] border border-primaria/20 bg-primaria/[0.07] px-4 py-3 text-[12.5px] leading-relaxed text-texto-2">
+          <div className="mt-3.5 rounded-grupo border border-primaria/20 bg-primaria/[0.07] px-4 py-3 text-[12.5px] leading-relaxed text-texto-2">
             ▤ Arquivos salvos em{' '}
             <strong className="text-texto">
               Drive compartilhado / Villa Serenità / notas fiscais / 2026 / [destinatário]
@@ -298,7 +278,7 @@ function Linha({
         {nf.destinatario?.nome_curto ?? '—'}
       </span>
 
-      <span className="text-right font-medium text-texto">
+      <span className="text-right font-medium text-texto tabular-nums">
         {formatarDinheiro(decimalParaCentavos(nf.valor_total))}
       </span>
 

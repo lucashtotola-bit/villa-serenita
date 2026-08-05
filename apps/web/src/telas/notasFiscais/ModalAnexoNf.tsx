@@ -57,7 +57,7 @@ export function ModalAnexoNf({
         {!anexos.isPending && (
           <div className="mb-4">
             {atual ? (
-              <div className="flex items-center justify-between rounded-[10px] border border-borda bg-fundo px-3 py-2.5">
+              <div className="flex items-center justify-between rounded-grupo border border-borda bg-fundo px-3 py-2.5">
                 <div className="min-w-0">
                   <p className="truncate text-[13px] text-texto">{atual.nome_arquivo}</p>
                   <p className="mt-0.5 text-[11.5px] text-texto-3">
@@ -74,7 +74,7 @@ export function ModalAnexoNf({
                 </button>
               </div>
             ) : (
-              <p className="rounded-[10px] border border-terracota-clara/30 bg-terracota-escura/10 px-3 py-2.5 text-[12.5px] text-terracota-clara">
+              <p className="rounded-grupo border border-terracota-clara/30 bg-terracota-escura/10 px-3 py-2.5 text-[12.5px] text-terracota-clara">
                 Nenhum documento anexado ainda.
               </p>
             )}
