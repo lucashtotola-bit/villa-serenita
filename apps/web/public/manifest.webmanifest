@@ -1,0 +1,25 @@
+{
+  "name": "Villa Serenità",
+  "short_name": "Villa Serenità",
+  "description": "Gestão da hospedagem e do café da Villa Serenità — Santa Teresa, ES.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#161c0d",
+  "theme_color": "#161c0d",
+  "icons": [
+    {
+      "src": "/icone.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icone.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

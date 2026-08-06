@@ -1,0 +1,4 @@
+# O aplicativo é uma SPA: as rotas (/reservas, /cafe…) existem só no
+# navegador. Sem isto, abrir um endereço direto (ou dar F5 fora da raiz)
+# devolveria 404 do Cloudflare em vez de carregar o app.
+/*  /index.html  200

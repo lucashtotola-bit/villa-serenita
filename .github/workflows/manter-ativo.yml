@@ -1,0 +1,30 @@
+# O Supabase gratuito pausa o projeto após ~7 dias sem uso da API. Numa
+# semana parada (viagem, entressafra), o app abriria com erro para todo
+# mundo até alguém reativar pelo painel. Este robô faz uma chamada por dia
+# para o banco nunca contar 7 dias de silêncio — risco mapeado no plano
+# do projeto desde o início.
+#
+# A chave usada é a PUBLICÁVEL, que já viaja no navegador de qualquer
+# usuário do app — não há segredo aqui. A service_role nunca entra no repo.
+name: Manter o Supabase ativo
+
+on:
+  schedule:
+    # Todo dia às 09:00 UTC (06:00 em ES). O horário exato não importa;
+    # importa não passar uma semana em silêncio.
+    - cron: '0 9 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  pulso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar a API do projeto
+        run: |
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' \
+            'https://kzccbmmfjvfygroywsma.supabase.co/auth/v1/health' \
+            -H 'apikey: sb_publishable_YRYXE2CzhkhzVhe48aUaQg_WTe9EkQh')
+          echo "Resposta: $codigo"
+          # 2xx = projeto de pé. Qualquer outra coisa derruba o job para o
+          # aviso de falha do GitHub chegar por e-mail.
+          [ "$codigo" -ge 200 ] && [ "$codigo" -lt 300 ]

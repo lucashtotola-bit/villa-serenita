@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../auth/contexto'
 import { MENU } from '../navegacao/menu'
+import { BotaoInstalar } from '../componentes/BotaoInstalar'
 
 /**
  * Barra lateral fixa de 224px, reproduzida do protótipo.
@@ -70,7 +71,9 @@ export function BarraLateral() {
         ))}
       </nav>
 
-      <div className="mt-auto rounded-grupo border border-borda bg-card p-3.5">
+      <div className="mt-auto flex flex-col gap-2.5">
+        <BotaoInstalar />
+        <div className="rounded-grupo border border-borda bg-card p-3.5">
         <div className="text-[10.5px] tracking-[0.06em] text-texto-3 uppercase">
           Conectado como
         </div>
@@ -84,6 +87,7 @@ export function BarraLateral() {
         >
           Sair
         </button>
+        </div>
       </div>
     </aside>
   )
