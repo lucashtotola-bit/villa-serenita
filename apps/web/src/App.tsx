@@ -14,6 +14,9 @@ import { Calendario } from './telas/reservas/Calendario'
 import { Safras } from './telas/safras/Safras'
 import { Cafe } from './telas/cafe/Cafe'
 import { Conciliacao } from './telas/conciliacao/Conciliacao'
+import { PrestacaoContas } from './telas/prestacao/PrestacaoContas'
+import { Aportes } from './telas/prestacao/Aportes'
+import { Distribuicoes } from './telas/prestacao/Distribuicoes'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -49,6 +52,9 @@ function Aplicativo() {
           <Route path="/notas-fiscais" element={<NotasFiscais />} />
           <Route path="/dividas" element={<Dividas />} />
           <Route path="/conciliacao" element={<Conciliacao />} />
+          <Route path="/prestacao-de-contas" element={<PrestacaoContas />} />
+          <Route path="/aportes" element={<Aportes />} />
+          <Route path="/distribuicao" element={<Distribuicoes />} />
           <Route path="/cadastros" element={<Cadastros />} />
           <Route path="/safras" element={<Safras />} />
           {/* Endereço desconhecido volta para a Visão geral. */}

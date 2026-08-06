@@ -95,3 +95,45 @@
     border-radius: 4px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Impressão
+   ---------------------------------------------------------------------------
+   A prestação de contas é um relatório para circular entre os sócios, então
+   precisa sair legível no papel e em PDF. A interface é escura; imprimir assim
+   gastaria tinta e sairia ilegível. Aqui ela vira documento: fundo branco,
+   texto preto, sem barra lateral nem botões.
+
+   Vale para qualquer tela impressa, e não só para o relatório — o custo é o
+   mesmo e evita que a próxima tela imprimível precise repetir tudo isto. */
+@media print {
+  nav,
+  aside {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+
+  /* As barras dos gráficos são a informação, não decoração: sem cor de fundo
+     elas somem. `print-color-adjust` pede ao navegador que as preserve. */
+  [class*='bg-primaria'],
+  [class*='bg-terracota'] {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .rounded-card {
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+  }
+}

@@ -47,6 +47,9 @@ export const MENU: GrupoMenu[] = [
       { caminho: '/notas-fiscais', icone: '▣', rotulo: 'Notas fiscais' },
       { caminho: '/dividas', icone: '◇', rotulo: 'Dívidas' },
       { caminho: '/conciliacao', icone: '⇄', rotulo: 'Conciliação' },
+      { caminho: '/prestacao-de-contas', icone: '◫', rotulo: 'Prestação de contas' },
+      { caminho: '/aportes', icone: '⊕', rotulo: 'Aportes' },
+      { caminho: '/distribuicao', icone: '◔', rotulo: 'Distribuição' },
     ],
   },
   {
