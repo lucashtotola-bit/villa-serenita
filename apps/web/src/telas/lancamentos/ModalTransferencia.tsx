@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { ENTRADA, Sobreposicao } from '../../componentes/formulario'
 import { useOpcoes } from '../../dados/opcoes'
 import {
   useCriarTransferencia,
@@ -12,10 +13,6 @@ import {
 } from '../../lib/formato'
 
 const hoje = () => new Date().toISOString().slice(0, 10)
-
-const ENTRADA =
-  'box-border w-full min-w-0 rounded-campo border border-borda-campo bg-fundo px-3 py-2.5 ' +
-  'text-[14px] text-texto placeholder:text-apagado outline-none focus:border-primaria'
 
 export function ModalTransferencia({
   aoFechar,
@@ -34,14 +31,6 @@ export function ModalTransferencia({
   const [destinoId, setDestinoId] = useState('')
   const [observacao, setObservacao] = useState('')
   const [erro, setErro] = useState<string | null>(null)
-
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
 
   const centavos = paraCentavos(valor)
   const nomeOrigem = contas.find((c) => c.id === origemId)?.nome
@@ -70,12 +59,7 @@ export function ModalTransferencia({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -212,7 +196,7 @@ export function ModalTransferencia({
           </button>
         </div>
       </form>
-    </div>
+    </Sobreposicao>
   )
 }
 

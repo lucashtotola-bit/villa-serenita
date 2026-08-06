@@ -18,23 +18,26 @@ import {
   mascaraDinheiro,
   paraCentavos,
 } from '../../lib/formato'
+import { hojeISO } from '../../lib/periodo'
+import { Campo, ENTRADA, Selecao, Sobreposicao } from '../../componentes/formulario'
 
 type Props = {
   tipo: 'Receita' | 'Despesa'
-  /** Presente = editando este lançamento avulso; ausente = criando um novo. */
+  /** Presente = editando este lançamento; ausente = criando um novo. */
   editando?: Lancamento
   aoFechar: () => void
   aoSalvar: () => void
 }
 
-const hoje = () => new Date().toISOString().slice(0, 10)
-
 /**
  * Janela de receita ou despesa — cria ou edita, conforme `editando`.
  *
- * Só lançamentos de origem "Avulso" chegam aqui em modo de edição: os gerados
- * automaticamente (parcela de NF, receita de reserva…) se editam pela tela de
- * origem, para não dessincronizar do valor que os gerou.
+ * Qualquer lançamento não conciliado pode ser editado, mas nos GERADOS
+ * (parcela de NF, receita de reserva, venda de café…) o valor fica travado:
+ * mudá-lo aqui dessincronizaria da parcela/reserva de origem, e a soma que o
+ * banco garante deixaria de significar algo. Corrigir o valor é mexer na
+ * origem. Já marcar como pago, mudar a data ou reclassificar são ajustes do
+ * próprio lançamento, e ficam liberados.
  *
  * A situação usa linguagem comum ("Já recebi" / "Ainda vou receber") em vez de
  * Prevista/Realizada: quem usa o sistema não precisa aprender o vocabulário do
@@ -46,14 +49,15 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
   const atualizar = useAtualizarLancamento()
   const salvando = editando ? atualizar : criar
   const receita = tipo === 'Receita'
+  const gerado = !!editando && editando.origem !== 'Avulso'
 
   const [descricao, setDescricao] = useState(editando?.descricao ?? '')
   const [valor, setValor] = useState(() =>
     editando ? mascaraDinheiro(String(decimalParaCentavos(editando.valor))) : '',
   )
-  const [jaAconteceu, setJaAconteceu] = useState(editando?.situacao !== 'Prevista')
+  const [jaAconteceu, setJaAconteceu] = useState(editando?.situacao === 'Realizada')
   const [data, setData] = useState(
-    editando ? (editando.data_pagamento ?? editando.data_vencimento) : hoje(),
+    editando ? (editando.data_pagamento ?? editando.data_vencimento) : hojeISO(),
   )
   const [contaId, setContaId] = useState(editando?.conta_id ?? '')
   const [categoriaId, setCategoriaId] = useState(editando?.categoria_id ?? '')
@@ -79,14 +83,6 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
     if (!editando) setCentroId(centros.length === 1 ? centros[0].id : '')
   }, [editando, centros])
 
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
-
   const faltaCadastro =
     !opcoes.isPending && (!contas.length || !categorias.length || !centros.length)
 
@@ -105,6 +101,8 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
       tipo,
       situacao: jaAconteceu ? 'Realizada' : 'Prevista',
       descricao: descricao.trim(),
+      // No gerado o campo é somente leitura, então o valor enviado é o mesmo
+      // que veio do banco — a atualização não o altera.
       valor: centavosParaDecimal(centavos),
       // Lançamento avulso tem uma data só; quando já aconteceu, ela vale para
       // vencimento e pagamento. Parcelas de NF, que nascem com vencimento e são
@@ -126,12 +124,7 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -142,9 +135,11 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
           {editando ? (receita ? 'Editar receita' : 'Editar despesa') : receita ? 'Nova receita' : 'Nova despesa'}
         </h2>
         <p className="mt-1 text-[13px] leading-relaxed text-texto-3">
-          {receita
-            ? 'Dinheiro que entra: diárias, venda de café, outros recebimentos.'
-            : 'Dinheiro que sai: insumos, serviços, manutenção, mão de obra.'}
+          {gerado
+            ? `Gerado por ${editando.origem.toLowerCase()} — o valor vem de lá e não se altera aqui.`
+            : receita
+              ? 'Dinheiro que entra: diárias, venda de café, outros recebimentos.'
+              : 'Dinheiro que sai: insumos, serviços, manutenção, mão de obra.'}
         </p>
 
         {faltaCadastro ? (
@@ -187,7 +182,9 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
                   inputMode="numeric"
                   onChange={(e) => setValor(mascaraDinheiro(e.target.value))}
                   placeholder="0,00"
-                  className={ENTRADA}
+                  disabled={gerado}
+                  title={gerado ? 'Definido pela origem — corrija lá, se for o caso' : undefined}
+                  className={`${ENTRADA} ${gerado ? 'cursor-not-allowed opacity-60' : ''}`}
                 />
               </Campo>
 
@@ -282,53 +279,6 @@ export function ModalLancamento({ tipo, editando, aoFechar, aoSalvar }: Props) {
           </button>
         </div>
       </form>
-    </div>
-  )
-}
-
-const ENTRADA =
-  'box-border w-full min-w-0 rounded-campo border border-borda-campo bg-fundo px-3 py-2.5 ' +
-  'text-[14px] text-texto placeholder:text-apagado outline-none focus:border-primaria'
-
-function Campo({
-  rotulo,
-  obrigatorio,
-  children,
-}: {
-  rotulo: string
-  obrigatorio?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-        {rotulo}
-        {obrigatorio && <span className="text-primaria"> *</span>}
-      </span>
-      {children}
-    </label>
-  )
-}
-
-function Selecao({
-  valor,
-  aoMudar,
-  opcoes,
-  vazio = 'Selecione…',
-}: {
-  valor: string
-  aoMudar: (v: string) => void
-  opcoes: { id: string; nome: string }[]
-  vazio?: string
-}) {
-  return (
-    <select value={valor} onChange={(e) => aoMudar(e.target.value)} className={ENTRADA}>
-      <option value="">{vazio}</option>
-      {opcoes.map((o) => (
-        <option key={o.id} value={o.id}>
-          {o.nome}
-        </option>
-      ))}
-    </select>
+    </Sobreposicao>
   )
 }

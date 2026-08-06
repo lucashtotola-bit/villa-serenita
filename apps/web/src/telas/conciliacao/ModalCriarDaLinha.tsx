@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Campo, ENTRADA, Sobreposicao } from '../../componentes/formulario'
 import { Link } from 'react-router-dom'
 import { categoriasDe, centrosDe, cliforDe, useOpcoes } from '../../dados/opcoes'
 import { useConciliarCriando, type LinhaExtrato } from '../../dados/conciliacao'
 import { decimalParaCentavos, formatarDinheiro, formatarData } from '../../lib/formato'
-
-const ENTRADA =
-  'box-border w-full min-w-0 rounded-campo border border-borda-campo bg-fundo px-3 py-2.5 ' +
-  'text-[13.5px] text-texto placeholder:text-apagado outline-none focus:border-primaria'
 
 /**
  * Cria o lançamento que faltava, a partir de uma linha do extrato.
@@ -45,14 +42,6 @@ export function ModalCriarDaLinha({
     setCentroId(centros.length === 1 ? centros[0].id : '')
   }, [centros])
 
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
-
   const faltaCadastro = !opcoes.isPending && (!categorias.length || !centros.length)
 
   function enviar(e: React.FormEvent) {
@@ -77,12 +66,7 @@ export function ModalCriarDaLinha({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -214,26 +198,7 @@ export function ModalCriarDaLinha({
           </button>
         </div>
       </form>
-    </div>
+    </Sobreposicao>
   )
 }
 
-function Campo({
-  rotulo,
-  obrigatorio,
-  children,
-}: {
-  rotulo: string
-  obrigatorio?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-        {rotulo}
-        {obrigatorio && <span className="text-primaria"> *</span>}
-      </span>
-      {children}
-    </label>
-  )
-}

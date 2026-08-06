@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { Sobreposicao } from '../../componentes/formulario'
 import {
   centavosParaDecimal,
   mascaraCPF,
@@ -75,15 +76,6 @@ export function ModalCadastro({
   const [valores, setValores] = useState(() => valoresIniciais(def))
   const [erro, setErro] = useState<string | null>(null)
 
-  // Fechar com Esc, como se espera de qualquer janela.
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
-
   const mensagem = erro ?? erroServidor
 
   const completo = useMemo(
@@ -133,12 +125,7 @@ export function ModalCadastro({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -229,6 +216,6 @@ export function ModalCadastro({
           </button>
         </div>
       </form>
-    </div>
+    </Sobreposicao>
   )
 }

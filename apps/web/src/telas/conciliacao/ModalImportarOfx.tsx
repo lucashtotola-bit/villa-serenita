@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useImportarExtrato, type ResultadoImportacao } from '../../dados/conciliacao'
 import { ErroOfx, lerOfx, type ExtratoOfx } from '../../lib/ofx'
 import { formatarDinheiro, formatarData } from '../../lib/formato'
+import { Sobreposicao } from '../../componentes/formulario'
 
 export function ModalImportarOfx({
   contaId,
@@ -19,14 +20,6 @@ export function ModalImportarOfx({
   const [extrato, setExtrato] = useState<ExtratoOfx | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [resultado, setResultado] = useState<ResultadoImportacao | null>(null)
-
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
 
   /**
    * O arquivo é lido e conferido aqui, antes de qualquer gravação: assim o
@@ -70,12 +63,7 @@ export function ModalImportarOfx({
     : null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <div
         role="dialog"
         aria-modal="true"
@@ -183,6 +171,6 @@ export function ModalImportarOfx({
           </>
         )}
       </div>
-    </div>
+    </Sobreposicao>
   )
 }

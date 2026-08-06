@@ -40,6 +40,7 @@ export type Lancamento = {
   categorias: { nome: string } | null
   centros_custo: { nome: string } | null
   contas_bancarias: { banco: string; apelido: string } | null
+  clientes_fornecedores: { nome: string } | null
 }
 
 export type SaldoConta = {
@@ -58,7 +59,8 @@ const CAMPOS = `
   conciliado, sentido, origem, conta_id, categoria_id, centro_id, clifor_id, observacao,
   categorias ( nome ),
   centros_custo ( nome ),
-  contas_bancarias ( banco, apelido )
+  contas_bancarias ( banco, apelido ),
+  clientes_fornecedores ( nome )
 `
 
 /** Lançamentos de um mês, opcionalmente de um tipo e de uma conta. */
@@ -122,9 +124,10 @@ export function useCriarLancamento() {
 }
 
 /**
- * Edita um lançamento avulso. O banco recusa se ele estiver conciliado
- * (trigger da migração 0003) ou não for de origem "Avulso" (migração 0011) —
- * a mensagem de erro do Postgres já chega traduzida.
+ * Edita um lançamento não conciliado. O banco recusa alterações num
+ * conciliado (migração 0003) e mudanças de tipo/origem num gerado (migração
+ * 0011); a tela trava o valor dos gerados antes disso, para o erro nem
+ * acontecer. A mensagem do Postgres já chega traduzida.
  */
 export function useAtualizarLancamento() {
   const qc = useQueryClient()

@@ -5,6 +5,11 @@ const MESES = [
   'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
 ]
 
+/** A data de hoje em ISO ('2026-08-05') — o formato de todo o aplicativo. */
+export function hojeISO(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 /** Primeiro dia do mês corrente, no formato 'AAAA-MM-01'. */
 export function competenciaAtual(): string {
   const hoje = new Date()

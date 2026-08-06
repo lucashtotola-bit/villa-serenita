@@ -13,8 +13,8 @@ import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { ModalLancamento } from './ModalLancamento'
 import { PainelTransferencias } from './PainelTransferencias'
 
-/** Colunas do protótipo (linha 334) + Ações, para editar/arquivar avulsos. */
-const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px 86px'
+/** Colunas do protótipo (linha 334) + Ações (detalhar/editar/arquivar). */
+const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px 168px'
 
 type Aba = {
   id: string
@@ -223,7 +223,7 @@ function Tabela({
 
   return (
     <div className="overflow-x-auto rounded-card border border-borda bg-card">
-      <div className="min-w-[1120px] px-5 pb-4">
+      <div className="min-w-[1200px] px-5 pb-4">
         <div
           className="grid gap-3 border-b border-borda py-3 text-[11px] tracking-[0.06em] text-texto-3 uppercase"
           style={{ gridTemplateColumns: GRADE }}
@@ -295,109 +295,201 @@ function Linha({
   const prevista = l.situacao === 'Prevista'
   const arquivar = useArquivarLancamento()
   const [confirmando, setConfirmando] = useState(false)
+  const [expandido, setExpandido] = useState(false)
 
-  // Só lançamentos avulsos e não conciliados são editáveis por aqui — os
-  // gerados (NF, reserva, café…) se editam pela tela de origem.
-  const editavel = l.origem === 'Avulso' && !l.conciliado
+  // Conciliado é somente leitura — o banco recusa qualquer alteração. Nos
+  // gerados (NF, reserva, café…) a edição abre com o valor travado; arquivar
+  // continua restrito aos avulsos, porque sumir com a parcela de uma NF
+  // deixaria a nota sem o compromisso que o banco garantiu.
+  const editavel = !l.conciliado
+  const arquivavel = l.origem === 'Avulso' && !l.conciliado
 
   return (
-    <div
-      className="grid items-center gap-3 border-b border-borda/60 py-2.5 text-[13.5px] last:border-0"
-      style={{ gridTemplateColumns: GRADE }}
-    >
-      <span className="text-[12.5px] text-texto-3">{diaMes(l.data_referencia)}</span>
-
-      <span className="truncate text-texto" title={l.descricao}>
-        {l.descricao}
-      </span>
-
-      <span className="min-w-0">
-        {l.centros_custo && (
-          <span className="inline-block max-w-full truncate rounded-pill bg-white/[0.06] px-2.5 py-[3px] text-[11.5px] text-texto-2">
-            {l.centros_custo.nome}
-          </span>
-        )}
-      </span>
-
-      <span className="truncate text-[12.5px] text-texto-3" title={l.categorias?.nome}>
-        {l.categorias?.nome ?? '—'}
-      </span>
-
-      <span className="truncate text-[12.5px] text-texto-3">
-        {l.contas_bancarias
-          ? `${l.contas_bancarias.banco} · ${l.contas_bancarias.apelido}`
-          : '—'}
-      </span>
-
-      <span
-        className={`text-right font-medium tabular-nums ${
-          prevista ? 'text-texto-3'
-          : receita ? 'text-verde-claro'
-          : 'text-terracota-escura'
-        }`}
+    <div className="border-b border-borda/60 last:border-0">
+      <div
+        className="grid items-center gap-3 py-2.5 text-[13.5px]"
+        style={{ gridTemplateColumns: GRADE }}
       >
-        {receita ? '+ ' : '− '}
-        {formatarDinheiro(valor)}
-      </span>
+        <span className="text-[12.5px] text-texto-3">{diaMes(l.data_referencia)}</span>
 
-      <span className="flex justify-end">
-        <Situacao lancamento={l} receita={receita} />
-      </span>
+        <span className="truncate text-texto" title={l.descricao}>
+          {l.descricao}
+        </span>
 
-      <span className="flex flex-col items-end gap-1">
-        {!editavel ? (
-          <span
-            title={
-              l.conciliado
-                ? 'Conciliado — desfaça a conciliação para editar'
-                : 'Gerado automaticamente — edite pela tela de origem'
-            }
-            className="text-[11.5px] text-apagado"
-          >
-            —
-          </span>
-        ) : confirmando ? (
-          <span className="inline-flex items-center gap-2 text-[12px]">
-            <button
-              type="button"
-              onClick={() => arquivar.mutate(l.id, { onSuccess: () => setConfirmando(false) })}
-              disabled={arquivar.isPending}
-              className="text-terracota-clara hover:underline"
-            >
-              {arquivar.isPending ? 'Arquivando…' : 'Confirmar'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmando(false)}
-              className="text-texto-3 hover:text-texto-2"
-            >
-              Não
-            </button>
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-2.5 text-[12px]">
-            <button
-              type="button"
-              onClick={() => aoEditar(l)}
-              className="text-texto-3 transition-colors hover:text-primaria-clara"
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              onClick={() => setConfirmando(true)}
-              className="text-texto-3 transition-colors hover:text-terracota-clara"
-            >
-              Arquivar
-            </button>
-          </span>
+        <span className="min-w-0">
+          {l.centros_custo && (
+            <span className="inline-block max-w-full truncate rounded-pill bg-white/[0.06] px-2.5 py-[3px] text-[11.5px] text-texto-2">
+              {l.centros_custo.nome}
+            </span>
+          )}
+        </span>
+
+        <span className="truncate text-[12.5px] text-texto-3" title={l.categorias?.nome}>
+          {l.categorias?.nome ?? '—'}
+        </span>
+
+        <span className="truncate text-[12.5px] text-texto-3">
+          {l.contas_bancarias
+            ? `${l.contas_bancarias.banco} · ${l.contas_bancarias.apelido}`
+            : '—'}
+        </span>
+
+        <span
+          className={`text-right font-medium tabular-nums ${
+            prevista ? 'text-texto-3'
+            : receita ? 'text-verde-claro'
+            : 'text-terracota-escura'
+          }`}
+        >
+          {receita ? '+ ' : '− '}
+          {formatarDinheiro(valor)}
+        </span>
+
+        <span className="flex justify-end">
+          <Situacao lancamento={l} receita={receita} />
+        </span>
+
+        <span className="flex flex-col items-end gap-1">
+          {confirmando ? (
+            <span className="inline-flex items-center gap-2 text-[12px]">
+              <button
+                type="button"
+                onClick={() => arquivar.mutate(l.id, { onSuccess: () => setConfirmando(false) })}
+                disabled={arquivar.isPending}
+                className="text-terracota-clara hover:underline"
+              >
+                {arquivar.isPending ? 'Arquivando…' : 'Confirmar'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmando(false)}
+                className="text-texto-3 hover:text-texto-2"
+              >
+                Não
+              </button>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-2.5 text-[12px]">
+              <button
+                type="button"
+                onClick={() => setExpandido((v) => !v)}
+                className={`transition-colors hover:text-texto ${
+                  expandido ? 'text-texto-2' : 'text-texto-3'
+                }`}
+              >
+                {expandido ? 'Recolher' : 'Detalhar'}
+              </button>
+              {editavel ? (
+                <button
+                  type="button"
+                  onClick={() => aoEditar(l)}
+                  title={
+                    l.origem !== 'Avulso'
+                      ? `Gerado por ${l.origem.toLowerCase()} — o valor não se altera aqui`
+                      : undefined
+                  }
+                  className="text-texto-3 transition-colors hover:text-primaria-clara"
+                >
+                  Editar
+                </button>
+              ) : (
+                <span
+                  title="Conciliado — desfaça a conciliação para editar"
+                  className="cursor-not-allowed text-apagado"
+                >
+                  Editar
+                </span>
+              )}
+              {arquivavel && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmando(true)}
+                  className="text-texto-3 transition-colors hover:text-terracota-clara"
+                >
+                  Arquivar
+                </button>
+              )}
+            </span>
+          )}
+          {arquivar.isError && (
+            <span className="max-w-[160px] text-right text-[11px] leading-snug text-terracota-clara">
+              {(arquivar.error as Error).message}
+            </span>
+          )}
+        </span>
+      </div>
+
+      {expandido && <Detalhes lancamento={l} receita={receita} />}
+    </div>
+  )
+}
+
+/**
+ * Painel expandido com tudo o que a linha resume — inclusive o que não coube
+ * nas colunas: vencimento e pagamento separados, origem, vínculo e observação.
+ */
+function Detalhes({ lancamento: l, receita }: { lancamento: Lancamento; receita: boolean }) {
+  const itens: { rotulo: string; valor: string }[] = [
+    { rotulo: 'Tipo', valor: l.tipo },
+    {
+      rotulo: 'Origem',
+      valor: l.origem === 'Avulso' ? 'Lançado direto (avulso)' : `Gerado por ${l.origem.toLowerCase()}`,
+    },
+    {
+      rotulo: 'Situação',
+      valor:
+        l.situacao === 'Prevista'
+          ? receita ? 'A receber' : 'A pagar'
+          : receita ? 'Recebido' : 'Pago',
+    },
+    { rotulo: 'Vencimento', valor: diaMes(l.data_vencimento) },
+    {
+      rotulo: 'Pagamento',
+      valor: l.data_pagamento ? diaMes(l.data_pagamento) : 'ainda não aconteceu',
+    },
+    {
+      rotulo: 'Conciliado',
+      valor: l.conciliado ? 'Sim — conferido com o extrato' : 'Não',
+    },
+    { rotulo: 'Categoria', valor: l.categorias?.nome ?? '—' },
+    { rotulo: 'Centro', valor: l.centros_custo?.nome ?? '—' },
+    {
+      rotulo: 'Conta bancária',
+      valor: l.contas_bancarias
+        ? `${l.contas_bancarias.banco} · ${l.contas_bancarias.apelido}`
+        : '—',
+    },
+    {
+      rotulo: receita ? 'Cliente' : 'Fornecedor',
+      valor: l.clientes_fornecedores?.nome ?? '—',
+    },
+    { rotulo: 'Valor', valor: formatarDinheiro(decimalParaCentavos(l.valor)) },
+  ]
+
+  return (
+    <div className="mb-2.5 rounded-grupo border border-borda bg-fundo/60 px-4 py-3.5">
+      <dl className="grid gap-x-6 gap-y-2.5 sm:grid-cols-3 lg:grid-cols-4">
+        {itens.map((i) => (
+          <div key={i.rotulo} className="min-w-0">
+            <dt className="text-[10.5px] tracking-[0.06em] text-texto-3 uppercase">
+              {i.rotulo}
+            </dt>
+            <dd className="mt-0.5 truncate text-[13px] text-texto-2" title={i.valor}>
+              {i.valor}
+            </dd>
+          </div>
+        ))}
+        {l.observacao && (
+          <div className="min-w-0 sm:col-span-3 lg:col-span-4">
+            <dt className="text-[10.5px] tracking-[0.06em] text-texto-3 uppercase">
+              Observação
+            </dt>
+            <dd className="mt-0.5 text-[13px] leading-relaxed break-words text-texto-2">
+              {l.observacao}
+            </dd>
+          </div>
         )}
-        {arquivar.isError && (
-          <span className="max-w-[140px] text-right text-[11px] leading-snug text-terracota-clara">
-            {(arquivar.error as Error).message}
-          </span>
-        )}
-      </span>
+      </dl>
     </div>
   )
 }

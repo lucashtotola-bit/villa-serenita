@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { Campo, ENTRADA, Sobreposicao } from '../../componentes/formulario'
 import { ETAPAS_SUGERIDAS, useCriarSafra, type NovaSafra } from '../../dados/safras'
-
-const ENTRADA =
-  'box-border w-full min-w-0 rounded-campo border border-borda-campo bg-fundo px-3 py-2.5 ' +
-  'text-[13.5px] text-texto placeholder:text-apagado outline-none focus:border-primaria'
 
 type LinhaEtapa = { nome: string; inicio: string; fim: string }
 
@@ -49,14 +46,6 @@ export function ModalSafra({
 
   const ciclo = `${anoInicio}/${String((anoInicio + 1) % 100).padStart(2, '0')}`
 
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
-
   function mudarAno(novo: number) {
     setAnoInicio(novo)
     setEtapas(etapasPadrao(novo))
@@ -98,12 +87,7 @@ export function ModalSafra({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -231,26 +215,7 @@ export function ModalSafra({
           </button>
         </div>
       </form>
-    </div>
+    </Sobreposicao>
   )
 }
 
-function Campo({
-  rotulo,
-  obrigatorio,
-  children,
-}: {
-  rotulo: string
-  obrigatorio?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-        {rotulo}
-        {obrigatorio && <span className="text-primaria"> *</span>}
-      </span>
-      {children}
-    </label>
-  )
-}

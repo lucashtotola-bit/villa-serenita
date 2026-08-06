@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Campo, ENTRADA, Sobreposicao } from '../../componentes/formulario'
 import {
   useCriarDistribuicao,
   useSociosComCota,
@@ -12,10 +13,6 @@ import {
   paraCentavos,
 } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, rotuloMes } from '../../lib/periodo'
-
-const ENTRADA =
-  'box-border w-full min-w-0 rounded-campo border border-borda-campo bg-fundo px-3 py-2.5 ' +
-  'text-[13.5px] text-texto placeholder:text-apagado outline-none focus:border-primaria'
 
 /** Os últimos meses, para apontar a retirada a uma competência de referência. */
 function mesesRecentes(quantos: number): string[] {
@@ -49,14 +46,6 @@ export function ModalDistribuicao({
   useEffect(() => {
     if (contas.length === 1) setContaId(contas[0].id)
   }, [contas])
-
-  useEffect(() => {
-    const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') aoFechar()
-    }
-    window.addEventListener('keydown', aoTeclar)
-    return () => window.removeEventListener('keydown', aoTeclar)
-  }, [aoFechar])
 
   const totalCentavos = paraCentavos(valorTotal)
 
@@ -123,12 +112,7 @@ export function ModalDistribuicao({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(10,14,6,0.72)] px-4 py-10"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) aoFechar()
-      }}
-    >
+    <Sobreposicao aoFechar={aoFechar}>
       <form
         onSubmit={enviar}
         role="dialog"
@@ -308,26 +292,7 @@ export function ModalDistribuicao({
           </button>
         </div>
       </form>
-    </div>
+    </Sobreposicao>
   )
 }
 
-function Campo({
-  rotulo,
-  obrigatorio,
-  children,
-}: {
-  rotulo: string
-  obrigatorio?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-        {rotulo}
-        {obrigatorio && <span className="text-primaria"> *</span>}
-      </span>
-      {children}
-    </label>
-  )
-}
