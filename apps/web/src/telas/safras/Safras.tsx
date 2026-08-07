@@ -126,7 +126,7 @@ function EditorEtapa({ etapa, aoFechar }: { etapa: SafraEtapa; aoFechar: () => v
         aria-modal="true"
         className="w-full max-w-[420px] rounded-card border border-borda bg-card p-5 shadow-[0_24px_60px_rgba(0,0,0,0.5)]"
       >
-        <h3 className="font-serif text-[19px] text-texto">{etapa.nome}</h3>
+        <h2 className="font-serif text-[22px] text-texto">{etapa.nome}</h2>
         <p className="mt-0.5 text-[12.5px] text-texto-3">
           Hoje: {formatarData(etapa.data_inicio)} a {formatarData(etapa.data_fim)}.
         </p>

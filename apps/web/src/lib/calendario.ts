@@ -46,6 +46,64 @@ export function noitesVendaveisNoMes(comp: string): number {
 export const LETRAS_SEMANA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
 /**
+ * Datas comemorativas (feriados nacionais, estaduais, municipais e pontos
+ * facultativos de calendário) de 2026 a 2028 — só para destaque visual na
+ * grade. Não alimenta "noite vendável" nem nenhuma regra de negócio.
+ */
+const FERIADOS = new Set([
+  '2026-01-01',
+  '2026-02-17',
+  '2026-04-03',
+  '2026-04-14',
+  '2026-04-21',
+  '2026-05-01',
+  '2026-06-04',
+  '2026-06-26',
+  '2026-09-07',
+  '2026-10-12',
+  '2026-10-15',
+  '2026-11-02',
+  '2026-11-15',
+  '2026-11-20',
+  '2026-12-25',
+  '2027-01-01',
+  '2027-02-09',
+  '2027-03-26',
+  '2027-04-06',
+  '2027-04-21',
+  '2027-05-01',
+  '2027-05-27',
+  '2027-06-25',
+  '2027-09-07',
+  '2027-10-12',
+  '2027-10-15',
+  '2027-11-02',
+  '2027-11-15',
+  '2027-11-20',
+  '2027-12-25',
+  '2028-01-01',
+  '2028-02-29',
+  '2028-04-14',
+  '2028-04-21',
+  '2028-04-25',
+  '2028-05-01',
+  '2028-06-15',
+  '2028-06-30',
+  '2028-09-07',
+  '2028-10-12',
+  '2028-10-15',
+  '2028-11-02',
+  '2028-11-15',
+  '2028-11-20',
+  '2028-12-25',
+])
+
+/** Data comemorativa (2026-2028) — só para destaque visual na grade. */
+export function eFeriado(data: string): boolean {
+  return FERIADOS.has(data)
+}
+
+/**
  * Cor de cada canal na grade, herdada do protótipo. 'Indicação' e 'Direto'
  * não existiam lá e receberam tons da mesma paleta.
  */

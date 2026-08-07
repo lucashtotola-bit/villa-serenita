@@ -68,7 +68,7 @@ export function ModalAnexoNf({
                   type="button"
                   onClick={() => abrir.mutate(atual.caminho_storage)}
                   disabled={abrir.isPending}
-                  className="ml-3 shrink-0 rounded-lg border border-primaria/40 px-3 py-1.5 text-[12.5px] text-verde-suave transition-colors hover:bg-primaria/15"
+                  className="ml-3 shrink-0 rounded-lg border border-primaria/45 px-3 py-1.5 text-[12.5px] text-verde-suave transition-colors hover:bg-primaria/15"
                 >
                   {abrir.isPending ? 'Abrindo…' : 'Ver'}
                 </button>

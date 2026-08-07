@@ -33,7 +33,7 @@ export function PainelTransferencias({
         <button
           type="button"
           onClick={() => setModalAberto(true)}
-          className="rounded-lg border border-primaria/40 px-3 py-1.5 text-[12.5px] whitespace-nowrap text-verde-suave transition-colors hover:bg-primaria/15"
+          className="rounded-lg border border-primaria/45 px-3 py-1.5 text-[12.5px] whitespace-nowrap text-verde-suave transition-colors hover:bg-primaria/15"
         >
           ＋ Nova transferência
         </button>

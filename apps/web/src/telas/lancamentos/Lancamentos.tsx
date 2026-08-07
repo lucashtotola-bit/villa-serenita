@@ -14,6 +14,7 @@ import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/periodo'
 import { BarraAbas } from '../../componentes/BarraAbas'
 import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
+import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { ModalLancamento } from './ModalLancamento'
 import { PainelTransferencias } from './PainelTransferencias'
 
@@ -196,21 +197,13 @@ function Saldos({ consulta }: { consulta: ReturnType<typeof useSaldos> }) {
       {consulta.data.map((c) => {
         const saldo = decimalParaCentavos(c.saldo_atual)
         return (
-          <div key={c.conta_id} className="rounded-card border border-borda bg-card p-5">
-            <p className="truncate text-[11px] tracking-[0.06em] text-texto-3 uppercase">
-              {c.banco} · {c.apelido}
-            </p>
-            <p
-              className={`mt-1.5 font-serif text-[26px] tabular-nums ${
-                saldo < 0 ? 'text-terracota-clara' : 'text-texto'
-              }`}
-            >
-              {formatarDinheiro(saldo)}
-            </p>
-            <p className="mt-0.5 text-[12px] text-apagado">
-              calculado a partir dos lançamentos
-            </p>
-          </div>
+          <CartaoKpi
+            key={c.conta_id}
+            rotulo={`${c.banco} · ${c.apelido}`}
+            valor={formatarDinheiro(saldo)}
+            detalhe="calculado a partir dos lançamentos"
+            alerta={saldo < 0}
+          />
         )
       })}
     </div>

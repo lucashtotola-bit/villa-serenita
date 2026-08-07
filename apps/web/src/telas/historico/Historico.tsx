@@ -140,10 +140,10 @@ function Filtro({
     <button
       type="button"
       onClick={aoClicar}
-      className={`rounded-pill border px-3 py-1.5 text-[12.5px] transition-colors ${
+      className={`rounded-pill px-3 py-1.5 text-[12.5px] transition-colors ${
         ativo
-          ? 'border-primaria/45 bg-primaria/15 text-verde-suave'
-          : 'border-borda-campo text-texto-3 hover:text-texto-2'
+          ? 'bg-primaria/15 text-verde-suave'
+          : 'border border-borda-campo text-texto-3 hover:text-texto-2'
       }`}
     >
       {rotulo}

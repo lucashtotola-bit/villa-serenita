@@ -13,6 +13,7 @@ import {
   dataDoDia,
   diaSemanaDoPrimeiro,
   diasDoMes,
+  eFeriado,
   noiteVendavel,
   noitesVendaveisNoMes,
 } from '../../lib/calendario'
@@ -301,6 +302,7 @@ function Celula({
 }) {
   const data = dataDoDia(competencia, dia)
   const vendavel = noiteVendavel(competencia, dia)
+  const feriado = eFeriado(data)
   const eHoje = data === hoje
 
   if (reserva) {
@@ -338,9 +340,11 @@ function Celula({
     <span
       title={vendavel ? 'Livre · noite vendável' : 'Livre'}
       className={`grid h-9 place-items-center rounded-[7px] text-[12.5px] transition-colors hover:bg-white/[0.07] ${
-        vendavel
-          ? 'border border-primaria/[0.22] bg-primaria/[0.09] text-verde-claro'
-          : 'text-apagado'
+        feriado
+          ? 'border border-terracota/[0.25] bg-terracota/[0.10] text-terracota-clara'
+          : vendavel
+            ? 'border border-primaria/[0.22] bg-primaria/[0.09] text-verde-claro'
+            : 'text-apagado'
       }`}
       style={eHoje ? { outline: '1.5px solid #dfe3cb', outlineOffset: '-1.5px' } : undefined}
     >
