@@ -85,12 +85,14 @@ export type NovaDistribuicao = {
 }
 
 /**
- * Grava a retirada e a divisão entre os sócios.
+ * Grava a retirada e a divisão entre os sócios numa chamada só (migração 0015).
+ * Se a divisão for recusada, nem a retirada é gravada — sem partes ela não
+ * significa nada e ninguém receberia.
  *
- * As partes entram numa única chamada porque a trava de "soma bate com o
- * total" é diferida até o fim da transação — uma a uma, a primeira falharia
- * sozinha. Se elas forem recusadas, a distribuição recém-criada é desfeita:
- * sem partes, ela não significa nada e ninguém receberia.
+ * O nome e a cota de cada parte são gravados pelo banco a partir de `socios`.
+ * Eles são uma fotografia, para o registro de hoje continuar legível se o
+ * cadastro mudar amanhã — e fotografia se tira da fonte, não do que esta aba
+ * tinha em memória. Por isso vai só o `socio_id` e o valor.
  */
 export function useCriarDistribuicao() {
   const qc = useQueryClient()
@@ -99,23 +101,17 @@ export function useCriarDistribuicao() {
     mutationFn: async (nova: NovaDistribuicao) => {
       const { partes, ...campos } = nova
 
-      const { data: distribuicao, error: erroDist } = await supabase
-        .from('distribuicoes')
-        .insert(campos)
-        .select('id')
-        .single()
-      if (erroDist) throw new Error(traduzirErro(erroDist))
+      const { data, error } = await supabase.rpc('criar_distribuicao', {
+        p_data: campos.data,
+        p_valor_total: campos.valor_total,
+        p_competencia_referencia: campos.competencia_referencia,
+        p_conta_id: campos.conta_id,
+        p_observacao: campos.observacao,
+        p_partes: partes.map((p) => ({ socio_id: p.socio_id, valor: p.valor })),
+      })
+      if (error) throw new Error(traduzirErro(error))
 
-      const { error: erroPartes } = await supabase
-        .from('distribuicao_socios')
-        .insert(partes.map((p) => ({ ...p, distribuicao_id: distribuicao.id })))
-
-      if (erroPartes) {
-        await supabase.from('distribuicoes').delete().eq('id', distribuicao.id)
-        throw new Error(traduzirErro(erroPartes))
-      }
-
-      return distribuicao.id as string
+      return data as string
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['distribuicoes'] })

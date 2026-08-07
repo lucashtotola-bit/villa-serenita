@@ -82,12 +82,12 @@ export type NovoContratoDivida = {
 }
 
 /**
- * Grava o contrato e suas parcelas. Como na nota fiscal, são duas transações:
- * se as parcelas falharem, o contrato recém-criado é desfeito para não sobrar
- * um contrato sem nenhuma parcela.
+ * Grava o contrato e suas parcelas numa chamada só (migração 0015). Antes eram
+ * duas transações, e o desfazer no cliente não funcionava — sobrava contrato
+ * sem parcela nenhuma.
  *
- * Diferente da nota fiscal, aqui não existe trava de soma — a soma das
- * parcelas supera o valor contratado por causa dos juros, e é assim mesmo.
+ * Diferente da nota fiscal, aqui não existe trava de soma: a soma das parcelas
+ * supera o valor contratado por causa dos juros, e é assim mesmo.
  */
 export function useCriarDivida() {
   const qc = useQueryClient()
@@ -96,28 +96,24 @@ export function useCriarDivida() {
     mutationFn: async (novo: NovoContratoDivida) => {
       const { parcelas, ...campos } = novo
 
-      const { data: ct, error: erroCt } = await supabase
-        .from('contratos_divida')
-        .insert(campos)
-        .select('id')
-        .single()
-      if (erroCt) throw new Error(traduzirErro(erroCt))
+      const { data, error } = await supabase.rpc('criar_contrato_divida', {
+        p_descricao: campos.descricao,
+        p_credor_id: campos.credor_id,
+        p_titular_socio_id: campos.titular_socio_id,
+        p_valor_contratado: campos.valor_contratado,
+        p_numero_parcelas: campos.numero_parcelas,
+        p_primeiro_vencimento: campos.primeiro_vencimento,
+        p_periodicidade: campos.periodicidade,
+        p_juros: campos.juros,
+        p_categoria_id: campos.categoria_id,
+        p_centro_id: campos.centro_id,
+        p_conta_id: campos.conta_id,
+        p_observacao: null,
+        p_parcelas: parcelas,
+      })
+      if (error) throw new Error(traduzirErro(error))
 
-      const { error: erroParc } = await supabase.from('divida_parcelas').insert(
-        parcelas.map((p, i) => ({
-          contrato_id: ct.id,
-          numero: i + 1,
-          vencimento: p.vencimento,
-          valor: p.valor,
-        })),
-      )
-
-      if (erroParc) {
-        await supabase.from('contratos_divida').delete().eq('id', ct.id)
-        throw new Error(traduzirErro(erroParc))
-      }
-
-      return ct.id as string
+      return data as string
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['dividas'] })

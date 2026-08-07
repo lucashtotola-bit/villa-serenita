@@ -67,9 +67,9 @@ export type NovaSafra = {
 }
 
 /**
- * Cria a safra e suas etapas. Se as etapas falharem, a safra recém-criada é
- * desfeita — safra sem etapa nenhuma não mostra status na tela do Café, que
- * é justamente para o que ela serve.
+ * Cria a safra e suas etapas numa chamada só (migração 0015). Se uma etapa for
+ * recusada, nem a safra é gravada — antes ela sobrava, sem etapa nenhuma, e
+ * safra sem etapa não mostra status na tela do Café, que é para o que serve.
  */
 export function useCriarSafra() {
   const qc = useQueryClient()
@@ -78,24 +78,16 @@ export function useCriarSafra() {
     mutationFn: async (nova: NovaSafra) => {
       const { etapas, ...campos } = nova
 
-      const { data: safra, error: erroSafra } = await supabase
-        .from('safras')
-        .insert(campos)
-        .select('id')
-        .single()
-      if (erroSafra) throw new Error(traduzirErro(erroSafra))
+      const { data, error } = await supabase.rpc('criar_safra', {
+        p_ciclo: campos.ciclo,
+        p_area_hectares: campos.area_hectares,
+        p_expectativa_sacas: campos.expectativa_sacas,
+        p_observacao: campos.observacao,
+        p_etapas: etapas,
+      })
+      if (error) throw new Error(traduzirErro(error))
 
-      if (etapas.length) {
-        const { error: erroEtapas } = await supabase
-          .from('safra_etapas')
-          .insert(etapas.map((e) => ({ ...e, safra_id: safra.id })))
-        if (erroEtapas) {
-          await supabase.from('safras').delete().eq('id', safra.id)
-          throw new Error(traduzirErro(erroEtapas))
-        }
-      }
-
-      return safra.id as string
+      return data as string
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['safras'] }),
   })

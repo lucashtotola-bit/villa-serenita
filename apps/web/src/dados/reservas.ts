@@ -118,14 +118,16 @@ export type NovaReserva = {
 }
 
 /**
- * Grava a reserva, a divisão entre as casas e — se pedido — a confirmação.
+ * Grava a reserva, a divisão entre as casas e — se pedido — a confirmação,
+ * tudo numa chamada só (migração 0015).
  *
- * A ordem importa e não é a óbvia. A reserva nasce sempre como Pré-reserva,
- * mesmo quando o usuário já quer confirmar: confirmar dispara o trigger que
- * cria as receitas, e essas receitas apontam de volta para a reserva. Se a
- * divisão entre as casas falhasse depois disso (soma errada ou casa já
- * ocupada), a reserva não poderia mais ser desfeita — os lançamentos a
- * segurariam. Confirmando só no fim, o desfazer continua possível.
+ * A ordem interna continua importando e continua não sendo a óbvia: a reserva
+ * nasce como Pré-reserva mesmo quando o usuário já quer confirmar, porque
+ * confirmar dispara o gatilho que cria as receitas. Só que agora essa ordem é
+ * assunto do banco.
+ *
+ * O que muda para quem usa: sumiu o estado "foi salva como pré-reserva mas a
+ * confirmação falhou". Ou a reserva existe confirmada, ou não existe.
  */
 export function useCriarReserva() {
   const qc = useQueryClient()
@@ -134,44 +136,24 @@ export function useCriarReserva() {
     mutationFn: async (nova: NovaReserva) => {
       const { acomodacoes, confirmar, ...campos } = nova
 
-      const { data: reserva, error: erroReserva } = await supabase
-        .from('reservas')
-        .insert({ ...campos, status: 'Pré-reserva' })
-        .select('id')
-        .single()
-      if (erroReserva) throw new Error(traduzirErro(erroReserva))
+      const { data, error } = await supabase.rpc('criar_reserva', {
+        p_hospede_id: campos.hospede_id,
+        p_canal: campos.canal,
+        p_data_entrada: campos.data_entrada,
+        p_data_saida: campos.data_saida,
+        p_numero_hospedes: campos.numero_hospedes,
+        p_valor_total: campos.valor_total,
+        p_sinal: campos.sinal,
+        p_categoria_id: campos.categoria_id,
+        p_centro_id: campos.centro_id,
+        p_conta_id: campos.conta_id,
+        p_observacao: campos.observacao,
+        p_acomodacoes: acomodacoes,
+        p_confirmar: confirmar,
+      })
+      if (error) throw new Error(traduzirErro(error))
 
-      // Uma única chamada: a trava de "soma das casas bate com o total" é
-      // diferida até o fim da transação, e cada request é sua própria
-      // transação — em duas chamadas, a primeira casa sozinha já falharia.
-      const { error: erroAcom } = await supabase.from('reserva_acomodacoes').insert(
-        acomodacoes.map((a) => ({
-          reserva_id: reserva.id,
-          acomodacao_id: a.acomodacao_id,
-          valor: a.valor,
-        })),
-      )
-      if (erroAcom) {
-        await supabase.from('reservas').delete().eq('id', reserva.id)
-        throw new Error(traduzirErro(erroAcom))
-      }
-
-      if (confirmar) {
-        const { error: erroStatus } = await supabase
-          .from('reservas')
-          .update({ status: 'Confirmada' })
-          .eq('id', reserva.id)
-        // A reserva está gravada e íntegra; só a confirmação falhou. Desfazer
-        // aqui seria pior — melhor deixá-la como pré-reserva e avisar.
-        if (erroStatus) {
-          throw new Error(
-            'A reserva foi salva como pré-reserva, mas não foi possível ' +
-              'confirmá-la: ' + traduzirErro(erroStatus),
-          )
-        }
-      }
-
-      return reserva.id as string
+      return data as string
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['reservas'] })

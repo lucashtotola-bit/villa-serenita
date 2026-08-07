@@ -93,9 +93,16 @@ export type NovaNotaFiscal = {
 }
 
 /**
- * Grava a nota e suas parcelas. São duas chamadas (duas transações), então em
- * caso de falha ao gravar as parcelas a nota recém-criada é desfeita — sem
- * isso, ficaria uma nota órfã, sem nenhuma parcela.
+ * Grava a nota e suas parcelas numa chamada só.
+ *
+ * Antes eram duas — e cada requisição do Supabase é a sua própria transação,
+ * então quando as parcelas falhavam a nota já estava gravada. O desfazer no
+ * cliente não funcionava (a tabela não tem DELETE liberado) e sobrava uma nota
+ * sem parcela, que ainda por cima travava o fechamento do mês. Agora quem
+ * desfaz é o ROLLBACK do banco (migração 0015).
+ *
+ * A numeração das parcelas deixou de ser enviada: sai da ordem do array, do
+ * lado de lá.
  */
 export function useCriarNotaFiscal() {
   const qc = useQueryClient()
@@ -104,31 +111,23 @@ export function useCriarNotaFiscal() {
     mutationFn: async (nova: NovaNotaFiscal) => {
       const { parcelas, ...campos } = nova
 
-      const { data: nf, error: erroNf } = await supabase
-        .from('notas_fiscais')
-        .insert(campos)
-        .select('id')
-        .single()
-      if (erroNf) throw new Error(traduzirErro(erroNf))
+      const { data, error } = await supabase.rpc('criar_nota_fiscal', {
+        p_numero: campos.numero,
+        // A tela ainda não coleta série nem observação; o banco aceita ambas.
+        p_serie: null,
+        p_data_emissao: campos.data_emissao,
+        p_valor_total: campos.valor_total,
+        p_emitente_id: campos.emitente_id,
+        p_destinatario_socio_id: campos.destinatario_socio_id,
+        p_categoria_id: campos.categoria_id,
+        p_centro_id: campos.centro_id,
+        p_conta_id: campos.conta_id,
+        p_observacao: null,
+        p_parcelas: parcelas,
+      })
+      if (error) throw new Error(traduzirErro(error))
 
-      // Uma única chamada com todas as parcelas: a trava de "soma bate com o
-      // total" é diferida até o fim desta transação, então todas as linhas
-      // precisam entrar juntas — uma a uma, a primeira falharia sozinha.
-      const { error: erroParc } = await supabase.from('nf_parcelas').insert(
-        parcelas.map((p, i) => ({
-          nota_fiscal_id: nf.id,
-          numero: i + 1,
-          vencimento: p.vencimento,
-          valor: p.valor,
-        })),
-      )
-
-      if (erroParc) {
-        await supabase.from('notas_fiscais').delete().eq('id', nf.id)
-        throw new Error(traduzirErro(erroParc))
-      }
-
-      return nf.id as string
+      return data as string
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['notas-fiscais'] })
