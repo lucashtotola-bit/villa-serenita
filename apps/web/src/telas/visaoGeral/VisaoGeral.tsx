@@ -25,6 +25,18 @@ import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { montarAlertas, type Alerta } from './alertas'
 
+/**
+ * Texto de variação percentual vs. o mês anterior, para o detalhe dos KPIs
+ * de fluxo. Sem mês anterior para comparar (ainda sem lançamento algum),
+ * não há variação que faça sentido mostrar.
+ */
+function variacaoTexto(atual: number, anterior: number): string | null {
+  if (anterior === 0) return null
+  const pct = ((atual - anterior) / anterior) * 100
+  const sinal = pct >= 0 ? '+' : ''
+  return `${sinal}${pct.toFixed(0)}% vs. mês anterior`
+}
+
 export function VisaoGeral() {
   const hoje = hojeISO()
   const competencia = competenciaAtual()
@@ -32,6 +44,7 @@ export function VisaoGeral() {
 
   const saldos = useSaldos()
   const movimentos = useMovimentosDoMes(competencia)
+  const movimentosAnterior = useMovimentosDoMes(anterior)
   const compromissos = useCompromissos(14)
   const naoConciliados = useNaoConciliados(anterior)
   const notasPendentes = useNotasPendentes()
@@ -42,6 +55,11 @@ export function VisaoGeral() {
   const totais = useMemo(
     () => totaisDoMes(movimentos.data ?? []),
     [movimentos.data],
+  )
+
+  const totaisAnterior = useMemo(
+    () => totaisDoMes(movimentosAnterior.data ?? []),
+    [movimentosAnterior.data],
   )
 
   const emCaixa = useMemo(
@@ -82,7 +100,7 @@ export function VisaoGeral() {
     return { vendaveis, casas: 3 }
   }, [competencia])
 
-  const carregando = saldos.isPending || movimentos.isPending
+  const carregando = saldos.isPending || movimentos.isPending || movimentosAnterior.isPending
 
   return (
     <div>
@@ -110,17 +128,22 @@ export function VisaoGeral() {
             <CartaoKpi
               rotulo={`Receitas · ${rotuloMes(competencia).split(' de ')[0]}`}
               valor={formatarDinheiro(totais.receitas)}
-              detalhe="recebido no mês"
+              detalhe={variacaoTexto(totais.receitas, totaisAnterior.receitas) ?? 'recebido no mês'}
             />
             <CartaoKpi
               rotulo="Despesas do mês"
               valor={formatarDinheiro(totais.despesas)}
-              detalhe="pago no mês"
+              detalhe={variacaoTexto(totais.despesas, totaisAnterior.despesas) ?? 'pago no mês'}
             />
             <CartaoKpi
               rotulo="Resultado do mês"
               valor={formatarDinheiro(totais.resultado)}
-              detalhe={totais.resultado < 0 ? 'mês no vermelho' : 'receitas menos despesas'}
+              detalhe={
+                totais.resultado < 0
+                  ? 'mês no vermelho'
+                  : (variacaoTexto(totais.resultado, totaisAnterior.resultado) ??
+                    'receitas menos despesas')
+              }
               alerta={totais.resultado < 0}
             />
           </div>
@@ -157,11 +180,7 @@ export function VisaoGeral() {
 
             <div className="flex flex-col gap-3.5">
               <Alertas alertas={alertas} />
-              <ResultadoMes
-                receitas={totais.receitas}
-                despesas={totais.despesas}
-                emCaixa={emCaixa}
-              />
+              <ResultadoMes receitas={totais.receitas} despesas={totais.despesas} />
               <AcumuladoPorSocio
                 linhas={acumulado.data ?? []}
                 ano={Number(competencia.slice(0, 4))}
@@ -334,23 +353,17 @@ function Alertas({ alertas }: { alertas: Alerta[] }) {
   )
 }
 
-function ResultadoMes({
-  receitas,
-  despesas,
-  emCaixa,
-}: {
-  receitas: number
-  despesas: number
-  emCaixa: number
-}) {
-  // As três barras compartilham a mesma escala, senão a comparação engana:
+function ResultadoMes({ receitas, despesas }: { receitas: number; despesas: number }) {
+  // As duas barras compartilham a mesma escala, senão a comparação engana:
   // uma despesa pequena não pode parecer do tamanho de uma receita grande.
-  const maior = Math.max(receitas, despesas, Math.abs(emCaixa), 1)
+  // "Em caixa" fica de fora — é saldo acumulado, não fluxo do mês, e já tem
+  // seu próprio KPI no topo da tela; misturado aqui, distorceria a escala das
+  // duas barras que de fato são comparáveis.
+  const maior = Math.max(receitas, despesas, 1)
 
   const barras = [
     { rotulo: 'Receitas', valor: receitas, cor: 'bg-primaria' },
     { rotulo: 'Despesas', valor: despesas, cor: 'bg-terracota-escura' },
-    { rotulo: 'Em caixa', valor: Math.abs(emCaixa), cor: 'bg-verde-suave/60' },
   ]
 
   return (
@@ -382,6 +395,47 @@ function ResultadoMes({
   )
 }
 
+/**
+ * Cor fixa por sócio, não por posição no ranking — se Michel ultrapassar
+ * Lucas no acumulado do ano, a cor de cada um não pode trocar de lugar. As
+ * notas fiscais só saem no CPF do Lucas ou do Michel (regra do sítio sem
+ * CNPJ), então dois nomes já cobrem todo caso real; um terceiro nome cai no
+ * verde-suave neutro em vez de inventar uma terceira cor fixa sem uso.
+ */
+function corDoSocio(nomeCurto: string): string {
+  if (nomeCurto === 'Lucas') return 'bg-primaria'
+  if (nomeCurto === 'Michel') return 'bg-terracota'
+  return 'bg-verde-suave/60'
+}
+
+/** Barra de proporção entre os dois sócios que podem receber nota fiscal. */
+function ProporcaoNf({
+  linhas,
+}: {
+  linhas: { socio_id: string; nome_curto: string; total: number }[]
+}) {
+  const total = linhas.reduce((t, l) => t + l.total, 0)
+  if (!total) return null
+
+  return (
+    <div
+      className="flex h-2 w-full gap-[2px] overflow-hidden rounded-full bg-white/[0.06]"
+      role="img"
+      aria-label={linhas
+        .map((l) => `${l.nome_curto} ${Math.round((l.total / total) * 100)}%`)
+        .join(', ')}
+    >
+      {linhas.map((l) => (
+        <div
+          key={l.socio_id}
+          className={`h-full ${corDoSocio(l.nome_curto)}`}
+          style={{ width: `${(l.total / total) * 100}%` }}
+        />
+      ))}
+    </div>
+  )
+}
+
 function AcumuladoPorSocio({
   linhas,
   ano,
@@ -405,18 +459,25 @@ function AcumuladoPorSocio({
       {!linhas.length ? (
         <p className="mt-3 text-[13px] text-texto-2">Nenhuma nota registrada em {ano}.</p>
       ) : (
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-3">
+          <ProporcaoNf linhas={linhas} />
           {linhas.map((l) => (
             <div
               key={l.socio_id}
               className="flex items-baseline justify-between gap-3 rounded-[9px] bg-white/[0.04] px-3.5 py-2.5"
             >
-              <span className="min-w-0">
-                <span className="block truncate text-[13.5px] font-medium text-texto">
-                  {l.nome_curto}
-                </span>
-                <span className="mt-[3px] block text-[11.5px] text-texto-3">
-                  {l.qtd} nota{l.qtd > 1 ? 's' : ''}
+              <span className="flex min-w-0 items-center gap-2.5">
+                <span
+                  aria-hidden
+                  className={`h-2 w-2 flex-none rounded-full ${corDoSocio(l.nome_curto)}`}
+                />
+                <span className="min-w-0">
+                  <span className="block truncate text-[13.5px] font-medium text-texto">
+                    {l.nome_curto}
+                  </span>
+                  <span className="mt-[3px] block text-[11.5px] text-texto-3">
+                    {l.qtd} nota{l.qtd > 1 ? 's' : ''}
+                  </span>
                 </span>
               </span>
               <span className="shrink-0 text-[13.5px] tabular-nums text-texto-2">

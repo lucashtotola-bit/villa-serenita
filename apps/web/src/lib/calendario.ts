@@ -104,15 +104,20 @@ export function eFeriado(data: string): boolean {
 }
 
 /**
- * Cor de cada canal na grade, herdada do protótipo. 'Indicação' e 'Direto'
- * não existiam lá e receberam tons da mesma paleta.
+ * Cor de cada canal na grade. A paleta herdada do protótipo falhava a
+ * validação de acessibilidade (contraste entre daltônicos e mesmo entre
+ * pessoas com visão normal — várias cores liam como o mesmo tom de verde
+ * apagado). Estes tons foram validados com `dataviz/scripts/validate_palette.js`
+ * contra o fundo do card (#212a14): nenhum par vizinho fica abaixo do piso de
+ * distinção. O nome do canal sempre aparece como texto junto da cor, então a
+ * identidade nunca depende só da cor.
  */
 export const CORES_CANAL: Record<string, { fundo: string; texto: string }> = {
-  Airbnb: { fundo: '#c2705a', texto: '#20100b' },
-  WhatsApp: { fundo: '#8aab55', texto: '#161c0d' },
-  Instagram: { fundo: '#cbd0b0', texto: '#161c0d' },
-  Indicação: { fundo: '#7d8f6a', texto: '#161c0d' },
-  Direto: { fundo: '#a8b088', texto: '#161c0d' },
+  Direto: { fundo: '#3987e5', texto: '#0a1420' },
+  Airbnb: { fundo: '#d95926', texto: '#1f0d02' },
+  WhatsApp: { fundo: '#199e70', texto: '#06140f' },
+  Indicação: { fundo: '#9085e9', texto: '#110c2b' },
+  Instagram: { fundo: '#d55181', texto: '#210a13' },
 }
 
 export function corDoCanal(canal: string) {
