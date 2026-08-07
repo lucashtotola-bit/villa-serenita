@@ -83,6 +83,23 @@ conciliação.
 - Menu agrupado: Operação / Financeiro / Configuração (ver protótipo).
 - Dinheiro: `numeric(14,2)` no Postgres e inteiros de centavos no TypeScript. **Nunca float.**
 - Um commit ao fim de cada etapa concluída.
+- Toda migração termina num bloco `do $$` que tenta violar cada regra que ela cria
+  e exige a recusa. E toda migração começa derrubando o que vai recriar
+  (`drop ... if exists`): o SQL Editor do Supabase confirma cada comando na hora,
+  então uma que falhe no meio precisa poder ser rodada de novo.
+
+## Antes de pedir para o dono rodar uma migração
+
+Aplique-a localmente, **nos dois modos**:
+
+```bash
+bash supabase/testes/testar.sh              # banco vazio
+SEMEAR=1 bash supabase/testes/testar.sh     # banco já em uso
+```
+
+Cada modo esconde uma classe de erro que o outro pega. O `supabase/testes/README.md`
+explica as três armadilhas que já custaram retrabalho — asserção absoluta sobre
+agregado por sócio, coluna gerada em gatilho `BEFORE`, e migração não refazível.
 
 ## O que NÃO fazer
 
