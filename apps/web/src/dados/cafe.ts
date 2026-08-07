@@ -220,6 +220,32 @@ export function useCriarVenda() {
   })
 }
 
+/**
+ * Arquiva uma venda lançada por engano.
+ *
+ * Não existe editar: mudar as sacas ou o preço aqui deixaria a receita e a
+ * baixa de estoque apontando para outro número (migração 0016). Arquivar
+ * desfaz as duas pontas — a receita é arquivada e as sacas voltam ao estoque
+ * por um movimento de Ajuste, porque movimento de estoque é histórico e não
+ * se apaga. Recusado se a receita já estiver conciliada.
+ */
+export function useArquivarVendaCafe() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('cafe_vendas').update({ ativo: false }).eq('id', id)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      invalidarCafe(qc)
+      qc.invalidateQueries({ queryKey: ['vendas-cafe'] })
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}
+
 /** '48.000' -> '48'; '12.500' -> '12,5'. Sacas não são dinheiro. */
 export function formatarSacas(valor: string | number): string {
   const n = Number(valor)

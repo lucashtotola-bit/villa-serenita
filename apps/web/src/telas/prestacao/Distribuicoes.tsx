@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  useArquivarDistribuicao,
   useDistribuicoes,
   useDistribuidoPorSocio,
   type Distribuicao,
@@ -10,6 +11,7 @@ import { rotuloMes } from '../../lib/periodo'
 import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { ModalDistribuicao } from './ModalDistribuicao'
+import { BotaoArquivar } from '../../componentes/BotaoArquivar'
 
 export function Distribuicoes() {
   const distribuicoes = useDistribuicoes()
@@ -107,6 +109,7 @@ export function Distribuicoes() {
 
 function Cartao({ distribuicao: d }: { distribuicao: Distribuicao }) {
   const total = decimalParaCentavos(d.valor_total)
+  const arquivar = useArquivarDistribuicao()
 
   return (
     <div className="rounded-card border border-borda bg-card p-5">
@@ -128,6 +131,13 @@ function Cartao({ distribuicao: d }: { distribuicao: Distribuicao }) {
             )}
           </p>
         </div>
+
+        <BotaoArquivar
+          arquivando={arquivar.isPending}
+          erro={arquivar.isError ? (arquivar.error as Error).message : null}
+          aviso="Os lançamentos de todos os sócios vão junto."
+          aoArquivar={(concluir) => arquivar.mutate(d.id, { onSuccess: concluir })}
+        />
       </div>
 
       {d.observacao && (

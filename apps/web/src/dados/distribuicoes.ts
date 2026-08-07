@@ -122,3 +122,28 @@ export function useCriarDistribuicao() {
     },
   })
 }
+
+/**
+ * Arquiva uma retirada lançada por engano.
+ *
+ * Não existe editar: alterar o total ou a divisão deixaria os lançamentos por
+ * sócio apontando para outros números (migração 0016). Arquivar leva todos
+ * eles junto — arquivar metade de uma partilha não é um estado que signifique
+ * algo. Recusado se qualquer um já estiver conciliado.
+ */
+export function useArquivarDistribuicao() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('distribuicoes').update({ ativo: false }).eq('id', id)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['distribuicoes'] })
+      qc.invalidateQueries({ queryKey: ['distribuido-por-socio'] })
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}

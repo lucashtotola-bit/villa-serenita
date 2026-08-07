@@ -9,9 +9,11 @@ import {
   useMovimentosDoMes,
   useNotasSemAnexoNoMes,
   useReabrirPeriodo,
+  useReaberturas,
   type Acrescimo as AcrescimoMes,
   type Agrupado,
   type Fechamento,
+  type Reabertura,
 } from '../../dados/prestacao'
 import { useDistribuicoes, type Distribuicao } from '../../dados/distribuicoes'
 import { decimalParaCentavos, formatarDinheiro, formatarData } from '../../lib/formato'
@@ -26,6 +28,7 @@ export function PrestacaoContas() {
   const movimentos = useMovimentosDoMes(competencia)
   const semAnexo = useNotasSemAnexoNoMes(competencia)
   const acrescimos = useAcrescimosDoMes(competencia)
+  const reaberturas = useReaberturas(competencia)
   const distribuicoes = useDistribuicoes()
   const [distribuindo, setDistribuindo] = useState(false)
 
@@ -157,6 +160,10 @@ export function PrestacaoContas() {
 
           {!!(acrescimos.data ?? []).length && (
             <Acrescimos linhas={acrescimos.data ?? []} />
+          )}
+
+          {!!(reaberturas.data ?? []).length && (
+            <Reaberturas linhas={reaberturas.data ?? []} />
           )}
 
           {!fechado && !!doMes.length && <Retiradas distribuicoes={doMes} />}
@@ -656,6 +663,52 @@ function Fechar({
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+/**
+ * Quando o mês já fechado precisou ser reaberto, e por quê.
+ *
+ * Antes da migração 0018 refechar apagava a linha anterior, e o motivo sumia
+ * com ela — o relatório passava a mostrar um mês que sempre esteve fechado.
+ * Como a prestação de contas é compartilhada entre os sócios, essa é
+ * justamente a informação que não pode ficar só no histórico técnico.
+ */
+function Reaberturas({ linhas }: { linhas: Reabertura[] }) {
+  return (
+    <div className="mt-4 rounded-card border border-borda bg-card p-5">
+      <h2 className="font-serif text-[19px] text-texto">
+        {linhas.length === 1 ? 'Este mês foi reaberto' : `Este mês foi reaberto ${linhas.length} vezes`}
+      </h2>
+      <p className="mt-1 text-[12.5px] leading-relaxed text-texto-3">
+        O resultado abaixo é o da versão vigente. As anteriores ficam
+        registradas com o motivo que levou a reabrir.
+      </p>
+
+      <div className="mt-3.5 flex flex-col gap-2">
+        {linhas.map((r) => (
+          <div
+            key={r.versao}
+            className="rounded-campo border border-borda bg-fundo px-3.5 py-2.5"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <span className="text-[13px] text-texto-2">
+                Versão {r.versao} — resultado de{' '}
+                <span className="tabular-nums">
+                  {formatarDinheiro(decimalParaCentavos(r.resultado))}
+                </span>
+              </span>
+              <span className="text-[11.5px] text-texto-3">
+                reaberto por {r.reaberto_por}
+                {r.reaberto_em &&
+                  ` em ${new Date(r.reaberto_em).toLocaleDateString('pt-BR')}`}
+              </span>
+            </div>
+            <p className="mt-1 text-[12.5px] text-texto-3">{r.motivo_reabertura}</p>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

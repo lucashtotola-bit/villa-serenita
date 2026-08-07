@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Campo, ENTRADA, Sobreposicao } from '../../componentes/formulario'
 import {
   useAportes,
+  useArquivarAporte,
   useCriarAporte,
   useSaldoAportes,
   type Aporte,
@@ -19,8 +20,9 @@ import {
 } from '../../lib/formato'
 import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { CartaoKpi } from '../../componentes/CartaoKpi'
+import { BotaoArquivar } from '../../componentes/BotaoArquivar'
 
-const GRADE = '96px minmax(0,1fr) 130px minmax(0,1fr) 120px'
+const GRADE = '96px minmax(0,1fr) 130px minmax(0,1fr) 120px 92px'
 
 export function Aportes() {
   const saldos = useSaldoAportes()
@@ -83,6 +85,7 @@ export function Aportes() {
                 <span>Movimento</span>
                 <span>Conta · observação</span>
                 <span className="text-right">Valor</span>
+                <span />
               </div>
 
               {aportes.isPending && <p className="py-8 text-[13px] text-texto-3">Carregando…</p>}
@@ -113,6 +116,7 @@ export function Aportes() {
 function Linha({ aporte: a }: { aporte: Aporte }) {
   const centavos = decimalParaCentavos(a.valor)
   const entrada = a.tipo === 'Aporte'
+  const arquivar = useArquivarAporte()
 
   return (
     <div
@@ -144,6 +148,15 @@ function Linha({ aporte: a }: { aporte: Aporte }) {
         }`}
       >
         {entrada ? '+' : '−'} {formatarDinheiro(centavos)}
+      </span>
+
+      <span className="text-right">
+        <BotaoArquivar
+          arquivando={arquivar.isPending}
+          erro={arquivar.isError ? (arquivar.error as Error).message : null}
+          aviso="O lançamento no caixa vai junto."
+          aoArquivar={(concluir) => arquivar.mutate(a.id, { onSuccess: concluir })}
+        />
       </span>
     </div>
   )

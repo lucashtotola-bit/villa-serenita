@@ -9,6 +9,7 @@ import {
   useVendasCafe,
   type Movimento,
   type Rendimento,
+  useArquivarVendaCafe,
   type VendaCafe,
 } from '../../dados/cafe'
 import { etapaAtual, statusEtapa, useSafras } from '../../dados/safras'
@@ -19,6 +20,7 @@ import { CartaoKpi } from '../../componentes/CartaoKpi'
 import { LinhaDoTempo } from '../safras/LinhaDoTempo'
 import { ModalMovimento, type ModoMovimento } from './ModalMovimento'
 import { ModalVendaCafe } from './ModalVendaCafe'
+import { BotaoArquivar } from '../../componentes/BotaoArquivar'
 
 type Aba = 'movimentos' | 'beneficiamentos' | 'vendas'
 
@@ -367,7 +369,7 @@ function TabelaRendimentos({
   )
 }
 
-const GRADE_VENDA = '96px minmax(0,1.3fr) 130px 120px 116px'
+const GRADE_VENDA = '96px minmax(0,1.3fr) 130px 120px 116px 92px'
 
 function TabelaVendas({ vendas, carregando }: { vendas: VendaCafe[]; carregando: boolean }) {
   return (
@@ -381,6 +383,7 @@ function TabelaVendas({ vendas, carregando }: { vendas: VendaCafe[]; carregando:
         <span>Café</span>
         <span className="text-right">Total</span>
         <span className="text-right">Recebimento</span>
+        <span />
       </div>
 
       {carregando && <p className="py-8 text-[13px] text-texto-3">Carregando…</p>}
@@ -390,11 +393,19 @@ function TabelaVendas({ vendas, carregando }: { vendas: VendaCafe[]; carregando:
         </p>
       )}
 
-      {vendas.map((v) => {
-        const recebida = v.lancamentos?.situacao === 'Realizada'
-        return (
+      {vendas.map((v) => (
+        <LinhaVenda key={v.id} venda={v} />
+      ))}
+    </>
+  )
+}
+
+function LinhaVenda({ venda: v }: { venda: VendaCafe }) {
+  const arquivar = useArquivarVendaCafe()
+  const recebida = v.lancamentos?.situacao === 'Realizada'
+
+  return (
           <div
-            key={v.id}
             className="grid items-center gap-2 border-b border-borda/60 py-3 text-[13.5px] last:border-0"
             style={{ gridTemplateColumns: GRADE_VENDA }}
           >
@@ -431,9 +442,15 @@ function TabelaVendas({ vendas, carregando }: { vendas: VendaCafe[]; carregando:
                 {recebida ? 'Recebido' : 'A receber'}
               </span>
             </span>
+
+            <span className="text-right">
+              <BotaoArquivar
+                arquivando={arquivar.isPending}
+                erro={arquivar.isError ? (arquivar.error as Error).message : null}
+                aviso="A receita é arquivada e as sacas voltam ao estoque."
+                aoArquivar={(concluir) => arquivar.mutate(v.id, { onSuccess: concluir })}
+              />
+            </span>
           </div>
-        )
-      })}
-    </>
   )
 }

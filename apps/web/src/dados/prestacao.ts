@@ -14,6 +14,7 @@ export type ParteSocio = {
 export type Fechamento = {
   id: string
   competencia: string
+  versao: number
   status: 'Fechado' | 'Reaberto'
   total_receitas: string
   total_despesas: string
@@ -24,7 +25,14 @@ export type Fechamento = {
   fechamento_socios: ParteSocio[]
 }
 
-/** O fechamento de uma competência, se já houver. */
+/**
+ * O fechamento vigente de uma competência, se já houver.
+ *
+ * Desde a migração 0018 um mês pode ter mais de um fechamento: refechar
+ * depois de reabrir cria uma versão nova em vez de apagar a anterior. A
+ * vigente é sempre a de maior versão — as outras ficam pelo motivo da
+ * reabertura, que `useReaberturas` lê.
+ */
 export function useFechamento(competencia: string) {
   return useQuery({
     queryKey: ['fechamento', competencia],
@@ -32,14 +40,46 @@ export function useFechamento(competencia: string) {
       const { data, error } = await supabase
         .from('fechamentos')
         .select(
-          `id, competencia, status, total_receitas, total_despesas, resultado,
+          `id, competencia, versao, status, total_receitas, total_despesas, resultado,
            fechado_em, reaberto_em, motivo_reabertura,
            fechamento_socios ( socio_id, nome_completo, cota, valor )`,
         )
         .eq('competencia', competencia)
-        .maybeSingle()
+        .order('versao', { ascending: false })
+        .limit(1)
       if (error) throw new Error(traduzirErro(error))
-      return (data ?? null) as unknown as Fechamento | null
+      return ((data?.[0] ?? null) as unknown) as Fechamento | null
+    },
+  })
+}
+
+export type Reabertura = {
+  competencia: string
+  versao: number
+  resultado: string
+  reaberto_em: string
+  motivo_reabertura: string
+  reaberto_por: string
+}
+
+/**
+ * As vezes em que a competência já foi reaberta.
+ *
+ * A prestação de contas é um relatório compartilhado entre os sócios, e "este
+ * mês foi reaberto, por tal motivo" é o tipo de coisa que eles precisam ver
+ * ali, sem ir garimpar no Histórico.
+ */
+export function useReaberturas(competencia: string) {
+  return useQuery({
+    queryKey: ['reaberturas', competencia],
+    queryFn: async (): Promise<Reabertura[]> => {
+      const { data, error } = await supabase
+        .from('reaberturas')
+        .select('competencia, versao, resultado, reaberto_em, motivo_reabertura, reaberto_por')
+        .eq('competencia', competencia)
+        .order('versao')
+      if (error) throw new Error(traduzirErro(error))
+      return (data ?? []) as Reabertura[]
     },
   })
 }
@@ -259,6 +299,32 @@ export function useCriarAporte() {
   return useMutation({
     mutationFn: async (novo: NovoAporte) => {
       const { error } = await supabase.from('aportes').insert(novo)
+      if (error) throw new Error(traduzirErro(error))
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['aportes'] })
+      qc.invalidateQueries({ queryKey: ['saldo-aportes'] })
+      qc.invalidateQueries({ queryKey: ['lancamentos'] })
+      qc.invalidateQueries({ queryKey: ['saldos'] })
+    },
+  })
+}
+
+/**
+ * Arquiva um aporte ou devolução lançado por engano.
+ *
+ * Não existe editar: desde a migração 0016 o banco recusa qualquer alteração
+ * que não seja arquivar ou anotar, porque mudar o valor aqui deixaria o
+ * lançamento no caixa apontando para outro número. Arquivar leva o lançamento
+ * junto, e é recusado se ele já estiver conciliado ou se houver devolução que
+ * dependa deste aporte.
+ */
+export function useArquivarAporte() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('aportes').update({ ativo: false }).eq('id', id)
       if (error) throw new Error(traduzirErro(error))
     },
     onSuccess: () => {
