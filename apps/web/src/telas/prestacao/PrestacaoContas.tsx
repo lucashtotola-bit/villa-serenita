@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import {
   agrupar,
   totaisDoMes,
+  useAcrescimosDoMes,
   useFechamento,
   useFecharPeriodo,
   useMovimentosDoMes,
   useNotasSemAnexoNoMes,
   useReabrirPeriodo,
+  type Acrescimo as AcrescimoMes,
   type Agrupado,
   type Fechamento,
 } from '../../dados/prestacao'
@@ -23,6 +25,7 @@ export function PrestacaoContas() {
   const fechamento = useFechamento(competencia)
   const movimentos = useMovimentosDoMes(competencia)
   const semAnexo = useNotasSemAnexoNoMes(competencia)
+  const acrescimos = useAcrescimosDoMes(competencia)
   const distribuicoes = useDistribuicoes()
   const [distribuindo, setDistribuindo] = useState(false)
 
@@ -152,6 +155,10 @@ export function PrestacaoContas() {
             />
           )}
 
+          {!!(acrescimos.data ?? []).length && (
+            <Acrescimos linhas={acrescimos.data ?? []} />
+          )}
+
           {!fechado && !!doMes.length && <Retiradas distribuicoes={doMes} />}
 
           <Fechar
@@ -169,6 +176,67 @@ export function PrestacaoContas() {
           aoFechar={() => setDistribuindo(false)}
         />
       )}
+    </div>
+  )
+}
+
+/**
+ * Juros, multas e descontos do mês.
+ *
+ * Fica fora dos quadros por frente e por categoria de propósito: lá o valor
+ * cheio pago já está somado na categoria da despesa, e repetir aqui contaria
+ * duas vezes. Este bloco responde a outra pergunta — quanto do que saiu foi
+ * custo de atraso, e não custo da coisa comprada.
+ */
+function Acrescimos({ linhas }: { linhas: AcrescimoMes[] }) {
+  const soma = (campo: 'juros' | 'multa' | 'desconto') =>
+    linhas.reduce((t, l) => t + decimalParaCentavos(l[campo]), 0)
+
+  const juros = soma('juros')
+  const multa = soma('multa')
+  const desconto = soma('desconto')
+  const qtd = linhas.reduce((t, l) => t + l.lancamentos, 0)
+
+  return (
+    <div className="mt-3.5 rounded-card border border-borda bg-card p-5">
+      <h2 className="font-serif text-[19px] text-texto">Juros, multas e descontos</h2>
+      <p className="mt-1 text-[12.5px] leading-relaxed text-texto-3">
+        O que o atraso custou e o que a negociação rendeu, em {qtd} baixa(s) do
+        mês. Já está somado no valor de cada despesa ou receita — aqui só se vê
+        separado.
+      </p>
+
+      <dl className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-[13.5px]">
+        {juros > 0 && (
+          <div>
+            <dt className="text-[11.5px] text-texto-3">Juros pagos</dt>
+            <dd className="tabular-nums text-terracota-clara">{formatarDinheiro(juros)}</dd>
+          </div>
+        )}
+        {multa > 0 && (
+          <div>
+            <dt className="text-[11.5px] text-texto-3">Multas</dt>
+            <dd className="tabular-nums text-terracota-clara">{formatarDinheiro(multa)}</dd>
+          </div>
+        )}
+        {desconto > 0 && (
+          <div>
+            <dt className="text-[11.5px] text-texto-3">Descontos obtidos</dt>
+            <dd className="tabular-nums text-verde-claro">{formatarDinheiro(desconto)}</dd>
+          </div>
+        )}
+        <div>
+          <dt className="text-[11.5px] text-texto-3">Efeito no resultado</dt>
+          <dd
+            className={`tabular-nums ${
+              juros + multa > desconto ? 'text-terracota-clara' : 'text-verde-claro'
+            }`}
+          >
+            {juros + multa > desconto ? '− ' : '+ '}
+            {formatarDinheiro(Math.abs(juros + multa - desconto))}
+          </dd>
+        </div>
+      </dl>
     </div>
   )
 }

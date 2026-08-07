@@ -3,18 +3,11 @@
  *
  * Os ícones são glifos tipográficos, não emoji nem biblioteca de ícones —
  * decisão registrada no CLAUDE.md ("sem emoji decorativo").
- *
- * `etapa` indica em qual etapa do projeto a tela fica pronta. Enquanto estiver
- * preenchido, o item abre um aviso de "em construção" em vez da tela real.
  */
 export type ItemMenu = {
   caminho: string
   icone: string
   rotulo: string
-  /** Etapa em que a tela é construída. Ausente = já está pronta. */
-  etapa?: number
-  /** O que a tela vai fazer, mostrado no aviso de em construção. */
-  resumo?: string
 }
 
 export type GrupoMenu = {
@@ -26,15 +19,7 @@ export const MENU: GrupoMenu[] = [
   {
     titulo: 'Operação',
     itens: [
-      {
-        caminho: '/',
-        icone: '◈',
-        rotulo: 'Visão geral',
-        etapa: 9,
-        resumo:
-          'Painéis com receita e despesa do mês, próximas chegadas, alertas e ' +
-          'notas fiscais acumuladas por sócio.',
-      },
+      { caminho: '/', icone: '◈', rotulo: 'Visão geral' },
       { caminho: '/calendario', icone: '▦', rotulo: 'Calendário' },
       { caminho: '/reservas', icone: '◍', rotulo: 'Reservas' },
       { caminho: '/cafe', icone: '✳', rotulo: 'Café' },
@@ -44,6 +29,7 @@ export const MENU: GrupoMenu[] = [
     titulo: 'Financeiro',
     itens: [
       { caminho: '/lancamentos', icone: '◎', rotulo: 'Lançamentos' },
+      { caminho: '/contas', icone: '⊟', rotulo: 'Contas a pagar/receber' },
       { caminho: '/notas-fiscais', icone: '▣', rotulo: 'Notas fiscais' },
       { caminho: '/dividas', icone: '◇', rotulo: 'Dívidas' },
       { caminho: '/conciliacao', icone: '⇄', rotulo: 'Conciliação' },

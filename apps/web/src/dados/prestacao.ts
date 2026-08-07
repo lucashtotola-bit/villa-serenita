@@ -119,6 +119,36 @@ export function useNotasSemAnexoNoMes(competencia: string) {
   })
 }
 
+export type Acrescimo = {
+  tipo: 'Receita' | 'Despesa'
+  juros: string
+  multa: string
+  desconto: string
+  lancamentos: number
+}
+
+/**
+ * Quanto o atraso custou (ou a negociação rendeu) no mês.
+ *
+ * A despesa continua na categoria dela pelo valor cheio pago — do contrário o
+ * custo de "Insumos" seria distorcido pelos juros do boleto. Aqui se vê a
+ * parcela do total que foi custo de atraso, que é a pergunta que aparece na
+ * reunião de sócios.
+ */
+export function useAcrescimosDoMes(competencia: string) {
+  return useQuery({
+    queryKey: ['acrescimos-do-mes', competencia],
+    queryFn: async (): Promise<Acrescimo[]> => {
+      const { data, error } = await supabase
+        .from('acrescimos_por_competencia')
+        .select('tipo, juros, multa, desconto, lancamentos')
+        .eq('competencia', competencia)
+      if (error) throw new Error(traduzirErro(error))
+      return (data ?? []) as Acrescimo[]
+    },
+  })
+}
+
 /** Fecha a competência. O banco recusa se houver pendência. */
 export function useFecharPeriodo() {
   const qc = useQueryClient()

@@ -4,9 +4,9 @@ import { TelaCentral } from './componentes/TelaCentral'
 import { Casca } from './layout/Casca'
 import { Login } from './telas/Login'
 import { AcessoNegado } from './telas/AcessoNegado'
-import { EmConstrucao } from './telas/EmConstrucao'
 import { Cadastros } from './telas/cadastros/Cadastros'
 import { Lancamentos } from './telas/lancamentos/Lancamentos'
+import { Contas } from './telas/contas/Contas'
 import { NotasFiscais } from './telas/notasFiscais/NotasFiscais'
 import { Dividas } from './telas/dividas/Dividas'
 import { Reservas } from './telas/reservas/Reservas'
@@ -17,6 +17,7 @@ import { Conciliacao } from './telas/conciliacao/Conciliacao'
 import { PrestacaoContas } from './telas/prestacao/PrestacaoContas'
 import { Aportes } from './telas/prestacao/Aportes'
 import { Distribuicoes } from './telas/prestacao/Distribuicoes'
+import { VisaoGeral } from './telas/visaoGeral/VisaoGeral'
 
 /**
  * Antes de qualquer tela, decide se a pessoa pode estar aqui. O aplicativo em
@@ -44,11 +45,12 @@ function Aplicativo() {
     <BrowserRouter>
       <Routes>
         <Route element={<Casca />}>
-          <Route path="/" element={<EmConstrucao />} />
+          <Route path="/" element={<VisaoGeral />} />
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/reservas" element={<Reservas />} />
           <Route path="/cafe" element={<Cafe />} />
           <Route path="/lancamentos" element={<Lancamentos />} />
+          <Route path="/contas" element={<Contas />} />
           <Route path="/notas-fiscais" element={<NotasFiscais />} />
           <Route path="/dividas" element={<Dividas />} />
           <Route path="/conciliacao" element={<Conciliacao />} />

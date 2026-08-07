@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
+  podeEstornar,
   useArquivarLancamento,
+  useEstornarBaixa,
   useLancamentos,
   useSaldos,
   type Lancamento,
   type TipoLancamento,
 } from '../../dados/lancamentos'
+import { ModalBaixa } from '../contas/ModalBaixa'
 import { decimalParaCentavos, formatarDinheiro } from '../../lib/formato'
 import { competenciaAtual, deslocarMes, diaMes, rotuloMes } from '../../lib/periodo'
 import { BarraAbas } from '../../componentes/BarraAbas'
@@ -13,22 +17,29 @@ import { CabecalhoPagina } from '../../componentes/CabecalhoPagina'
 import { ModalLancamento } from './ModalLancamento'
 import { PainelTransferencias } from './PainelTransferencias'
 
-/** Colunas do protótipo (linha 334) + Ações (detalhar/editar/arquivar). */
-const GRADE = '76px minmax(0,1fr) 148px 124px 142px 108px 104px 168px'
+/** Colunas do protótipo (linha 334) + Ações (baixar/detalhar/editar/arquivar). */
+const GRADE = '76px minmax(0,1fr) 138px 118px 132px 104px 100px 236px'
 
 type Aba = {
   id: string
   rotulo: string
   tipo?: TipoLancamento
-  etapa?: number
+  /** Aba que leva a uma tela própria em vez de trocar o conteúdo aqui. */
+  caminho?: string
 }
 
+/**
+ * As abas do protótipo. Dívidas e Prestação de contas ganharam telas próprias
+ * (são grandes demais para caber aqui), mas continuam na barra porque é onde
+ * se procura por elas — clicar leva à tela, em vez de mostrar um pedaço pior
+ * da mesma coisa.
+ */
 const ABAS: Aba[] = [
   { id: 'rec', rotulo: 'Receitas', tipo: 'Receita' },
   { id: 'desp', rotulo: 'Despesas', tipo: 'Despesa' },
   { id: 'transf', rotulo: 'Transferências', tipo: 'Transferência' },
-  { id: 'div', rotulo: 'Dívidas', etapa: 3 },
-  { id: 'soc', rotulo: 'Prestação de contas', etapa: 7 },
+  { id: 'div', rotulo: 'Dívidas', caminho: '/dividas' },
+  { id: 'soc', rotulo: 'Prestação de contas', caminho: '/prestacao-de-contas' },
 ]
 
 export function Lancamentos() {
@@ -38,8 +49,15 @@ export function Lancamentos() {
   const [modalAberto, setModalAberto] = useState(false)
   const [editando, setEditando] = useState<Lancamento | null>(null)
 
+  const navegar = useNavigate()
   const aba = ABAS.find((a) => a.id === abaId) ?? ABAS[0]
   const saldos = useSaldos()
+
+  function trocarAba(id: string) {
+    const alvo = ABAS.find((a) => a.id === id)
+    if (alvo?.caminho) navegar(alvo.caminho)
+    else setAbaId(id)
+  }
 
   const lancamentos = useLancamentos({
     competencia,
@@ -75,7 +93,7 @@ export function Lancamentos() {
       <Saldos consulta={saldos} />
 
       <div className="mt-6 mb-4 flex flex-wrap items-center gap-3">
-        <BarraAbas abas={ABAS} ativa={abaId} aoMudar={setAbaId} />
+        <BarraAbas abas={ABAS} ativa={abaId} aoMudar={trocarAba} />
 
         {aba.tipo && (
           <label className="flex items-center gap-2 text-[12px] text-texto-3">
@@ -106,16 +124,7 @@ export function Lancamentos() {
         )}
       </div>
 
-      {aba.etapa ? (
-        <div className="rounded-card border border-borda bg-card p-6">
-          <span className="inline-block rounded-pill border border-borda-campo px-3 py-1 text-[12px] text-texto-3">
-            Em construção · Etapa {aba.etapa}
-          </span>
-          <p className="mt-3 text-[13.5px] text-texto-2">
-            Esta aba entra na Etapa {aba.etapa}. As tabelas já existem no banco.
-          </p>
-        </div>
-      ) : aba.id === 'transf' ? (
+      {aba.id === 'transf' ? (
         <PainelTransferencias competencia={competencia} contaId={contaId || undefined} />
       ) : (
         <Tabela
@@ -223,7 +232,7 @@ function Tabela({
 
   return (
     <div className="overflow-x-auto rounded-card border border-borda bg-card">
-      <div className="min-w-[1200px] px-5 pb-4">
+      <div className="min-w-[1260px] px-5 pb-4">
         <div
           className="grid gap-3 border-b border-borda py-3 text-[11px] tracking-[0.06em] text-texto-3 uppercase"
           style={{ gridTemplateColumns: GRADE }}
@@ -294,8 +303,10 @@ function Linha({
   const valor = decimalParaCentavos(l.valor)
   const prevista = l.situacao === 'Prevista'
   const arquivar = useArquivarLancamento()
+  const estornar = useEstornarBaixa()
   const [confirmando, setConfirmando] = useState(false)
   const [expandido, setExpandido] = useState(false)
+  const [baixando, setBaixando] = useState(false)
 
   // Conciliado é somente leitura — o banco recusa qualquer alteração. Nos
   // gerados (NF, reserva, café…) a edição abre com o valor travado; arquivar
@@ -370,6 +381,26 @@ function Linha({
             </span>
           ) : (
             <span className="inline-flex items-center gap-2.5 text-[12px]">
+              {prevista && !l.conciliado && (
+                <button
+                  type="button"
+                  onClick={() => setBaixando(true)}
+                  className="rounded-lg border border-primaria/45 px-2 py-[3px] whitespace-nowrap text-verde-suave transition-colors hover:bg-primaria/15"
+                >
+                  {receita ? 'Receber' : 'Pagar'}
+                </button>
+              )}
+              {podeEstornar(l) && (
+                <button
+                  type="button"
+                  onClick={() => estornar.mutate(l.id)}
+                  disabled={estornar.isPending}
+                  title="Volta a conta para em aberto, desfazendo juros e desconto"
+                  className="text-texto-3 transition-colors hover:text-terracota-clara"
+                >
+                  {estornar.isPending ? 'Estornando…' : 'Estornar'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setExpandido((v) => !v)}
@@ -420,6 +451,10 @@ function Linha({
       </div>
 
       {expandido && <Detalhes lancamento={l} receita={receita} />}
+
+      {baixando && (
+        <ModalBaixa lancamentos={[l]} aoFechar={() => setBaixando(false)} />
+      )}
     </div>
   )
 }
@@ -451,6 +486,24 @@ function Detalhes({ lancamento: l, receita }: { lancamento: Lancamento; receita:
       rotulo: 'Conciliado',
       valor: l.conciliado ? 'Sim — conferido com o extrato' : 'Não',
     },
+    // Só aparecem quando houve diferença: numa baixa comum, três campos
+    // zerados seriam só ruído.
+    ...(l.valor_original
+      ? [
+          {
+            rotulo: 'Valor previsto',
+            valor: formatarDinheiro(decimalParaCentavos(l.valor_original)),
+          },
+          {
+            rotulo: 'Juros / multa',
+            valor: `${formatarDinheiro(decimalParaCentavos(l.juros))} / ${formatarDinheiro(decimalParaCentavos(l.multa))}`,
+          },
+          {
+            rotulo: 'Desconto',
+            valor: formatarDinheiro(decimalParaCentavos(l.desconto)),
+          },
+        ]
+      : []),
     { rotulo: 'Categoria', valor: l.categorias?.nome ?? '—' },
     { rotulo: 'Centro', valor: l.centros_custo?.nome ?? '—' },
     {
@@ -463,7 +516,10 @@ function Detalhes({ lancamento: l, receita }: { lancamento: Lancamento; receita:
       rotulo: receita ? 'Cliente' : 'Fornecedor',
       valor: l.clientes_fornecedores?.nome ?? '—',
     },
-    { rotulo: 'Valor', valor: formatarDinheiro(decimalParaCentavos(l.valor)) },
+    {
+      rotulo: l.valor_original ? 'Valor pago' : 'Valor',
+      valor: formatarDinheiro(decimalParaCentavos(l.valor)),
+    },
   ]
 
   return (
