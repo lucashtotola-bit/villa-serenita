@@ -68,7 +68,35 @@ export function useEnviarAnexoNf(notaFiscalId: string) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['anexos', 'nota-fiscal', notaFiscalId] })
       qc.invalidateQueries({ queryKey: ['notas-fiscais-sem-anexo'] })
+      // O espelho no Drive é para o contador, e o anexo já está salvo e
+      // utilizável sem ele. Por isso dispara solto e o erro é engolido: uma
+      // falha no Drive não pode transformar um envio bem-sucedido em erro na
+      // tela. O que não subir agora fica 'Pendente' e vai na próxima.
+      espelharNoDrive()
     },
+  })
+}
+
+/**
+ * Pede à Edge Function que suba ao Drive o que estiver pendente.
+ *
+ * Não espera resposta de propósito: quem anexou não tem nada a fazer com ela.
+ */
+export function espelharNoDrive() {
+  supabase.functions.invoke('espelhar-drive').catch(() => {})
+}
+
+/** Reenvio manual, para a tela poder mostrar o que aconteceu. */
+export function useEspelharNoDrive() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('espelhar-drive')
+      if (error) throw new Error(error.message)
+      return data as { enviados: number; falhas: number; detalhes?: string[] }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['anexos'] }),
   })
 }
 
