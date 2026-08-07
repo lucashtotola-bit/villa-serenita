@@ -43,6 +43,7 @@ export const MENU: GrupoMenu[] = [
     itens: [
       { caminho: '/cadastros', icone: '☰', rotulo: 'Cadastros' },
       { caminho: '/safras', icone: '❋', rotulo: 'Safras' },
+      { caminho: '/historico', icone: '⟳', rotulo: 'Histórico' },
     ],
   },
 ]
