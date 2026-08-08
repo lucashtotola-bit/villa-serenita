@@ -5,7 +5,6 @@ import { Casca } from './layout/Casca'
 import { Login } from './telas/Login'
 import { AcessoNegado } from './telas/AcessoNegado'
 import { Cadastros } from './telas/cadastros/Cadastros'
-import { Historico } from './telas/historico/Historico'
 import { Lancamentos } from './telas/lancamentos/Lancamentos'
 import { Contas } from './telas/contas/Contas'
 import { NotasFiscais } from './telas/notasFiscais/NotasFiscais'
@@ -59,7 +58,6 @@ function Aplicativo() {
           <Route path="/aportes" element={<Aportes />} />
           <Route path="/distribuicao" element={<Distribuicoes />} />
           <Route path="/cadastros" element={<Cadastros />} />
-          <Route path="/historico" element={<Historico />} />
           <Route path="/safras" element={<Safras />} />
           {/* Endereço desconhecido volta para a Visão geral. */}
           <Route path="*" element={<Navigate to="/" replace />} />

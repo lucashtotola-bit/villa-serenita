@@ -67,7 +67,14 @@ destinatário de NF restrito; origem ≠ destino em transferência; dupla reserv
 recusada por restrição de exclusão; estoque de café não fica negativo; parcelas de NF/dívida geram
 despesas previstas; saldos e prestação de contas calculados a partir dos lançamentos;
 `fechar_periodo()` recusa mês não conciliado **ou com nota fiscal sem documento**;
-`audit_log` alimentado por trigger.
+exclusividade do sócio com `pode_desfazer_conciliacao` para desfazer conciliação de
+competência fechada ou reabrir período (`tg_lancamento_conciliado_travado()`,
+`reabrir_periodo()`) — verificada no banco, sem depender de log.
+
+Auditoria geral (`audit_log` alimentado por trigger em toda tabela, tela de Histórico)
+foi desligada em 08/08/2026 a pedido do dono: sociedade familiar, sem necessidade de
+rastrear quem alterou o quê. A tabela `audit_log` e o que já foi gravado continuam no
+banco (nada é apagado), só não recebem mais linhas novas.
 
 Ficam na aplicação: pré-preenchimentos, cálculo de +30 dias, redivisão de parcelas, UX de
 conciliação.

@@ -67,7 +67,7 @@ export type Reabertura = {
  *
  * A prestação de contas é um relatório compartilhado entre os sócios, e "este
  * mês foi reaberto, por tal motivo" é o tipo de coisa que eles precisam ver
- * ali, sem ir garimpar no Histórico.
+ * direto ali.
  */
 export function useReaberturas(competencia: string) {
   return useQuery({
